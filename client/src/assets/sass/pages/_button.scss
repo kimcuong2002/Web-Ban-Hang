@@ -1,0 +1,9 @@
+.btn {
+  @apply py-3 px-5 text-white rounded uppercase;
+}
+.btn-warning {
+  @apply bg-orange-500 py-[6px] hover:bg-orange-600;
+}
+.btn-danger {
+  @apply bg-rose-700 py-[6px] hover:bg-rose-800;
+}

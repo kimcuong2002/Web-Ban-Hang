@@ -1,0 +1,7 @@
+.alert-danger {
+  @apply bg-rose-100 text-rose-700 p-3 mb-2 border-l-4 border-rose-600 text-sm font-medium;
+}
+
+.alert-success {
+  @apply bg-indigo-100 text-indigo-900 p-3 mb-2 text-sm font-medium border-l-4 border-indigo-600;
+}

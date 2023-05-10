@@ -1,0 +1,43 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "./variables";
+@import "./mixins";
+@import "./base";
+
+@import "./pages/form";
+@import "./pages/button";
+@import "./pages/alert";
+
+@import "./pages/authForm";
+@import "./pages/createProduct";
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.mySwiper {
+  border: 1px solid rgb(161, 161, 161);
+}
+
+.swiper {
+  width: 100%;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.swiper-slide {
+  background-position: center;
+  background-size: cover;
+  width: 150px;
+  height: 150px;
+}
+
+.swiper-slide img {
+  display: block;
+  width: 100%;
+}
