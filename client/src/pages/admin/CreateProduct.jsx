@@ -12,14 +12,13 @@ import Spinner from "../../components/Spinner";
 import Colors from "../../components/Colors";
 import SizesList from "../../components/SizesList";
 import ImagesPreview from "../../components/ImagesPreview";
-
 import { BsArrowLeftShort } from "react-icons/bs";
-
 import { useAllCategoriesQuery } from "../../redux/services/categoryService";
 import { useCProductMutation } from "../../redux/services/productService";
 import { setSuccess } from "../../redux/reducers/globalReducer";
+import { useForm } from "react-hook-form";
 
-const CreateProduct = () => {
+const CreateProduct = ({ onSubmit }) => {
   const { data = [], isFetching } = useAllCategoriesQuery();
   const [value, setValue] = useState("");
   const [state, setState] = useState({
@@ -105,6 +104,14 @@ const CreateProduct = () => {
       navigate("/admin/products");
     }
   }, [response?.isSuccess]);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+  const handleSubmitProduct = (data) => {
+    console.log(data);
+  };
   return (
     <Wrapper>
       <ScreenHeader>
@@ -117,7 +124,10 @@ const CreateProduct = () => {
       </ScreenHeader>
       <Toaster position="top-right" reverseOrder={true} />
       <div className="flex flex-wrap -mx-3">
-        <form className="w-full xl:w-8/12 p-3" onSubmit={createPro}>
+        <form
+          className="w-full xl:w-8/12 p-3"
+          onSubmit={handleSubmit(handleSubmitProduct)}
+        >
           <div className="flex flex-wrap">
             <div className="w-full md:w-6/12 p-3">
               <label
@@ -132,14 +142,13 @@ const CreateProduct = () => {
                 className="text-sm rounded border focus:border-green-700 focus:border-2 block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white outline-none"
                 id="name"
                 placeholder="Product Name..."
-                onChange={handleInput}
-                value={state.name}
-                required
+                {...register("name", { required: "Name is required!" })}
               />
-              <p className="mt-2 text-sm text-red-600 dark:text-red-500">
-                <span className="font-medium">Oh, Product's name!</span> Cannot
-                be left blank.
-              </p>
+              {errors.name && (
+                <span className="text-err text-red-700">
+                  {errors.name.message}
+                </span>
+              )}
             </div>
             <div className="w-full md:w-6/12 p-3">
               <label
@@ -149,19 +158,27 @@ const CreateProduct = () => {
                 Price
               </label>
               <input
-                type="number"
                 name="price"
                 className="text-sm rounded border focus:border-green-700 focus:border-2 block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white outline-none"
                 id="price"
                 placeholder="Price..."
-                onChange={handleInput}
-                value={state.price}
-                required
+                {...register("price", {
+                  required: "Price is required",
+                  min: {
+                    value: 100000,
+                    message: "Price is not valid!",
+                  },
+                  pattern: {
+                    value: /^\d*[1-9]\d*$/,
+                    message: "Price is not valid!",
+                  },
+                })}
               />
-              <p className="mt-2 text-sm text-red-600 dark:text-red-500">
-                <span className="font-medium">Oh, Price!</span> Cannot be left
-                blank.
-              </p>
+              {errors.price && (
+                <span className="text-err text-red-700">
+                  {errors.price.message}
+                </span>
+              )}
             </div>
             <div className="w-full md:w-6/12 p-3">
               <label
@@ -170,17 +187,32 @@ const CreateProduct = () => {
               >
                 Discount
               </label>
-              <div className="flex justify-center items-center gap-3">
-                <input
-                  type="number"
-                  name="discount"
-                  className="w-full text-sm rounded border focus:border-green-700 focus:border-2 block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white outline-none"
-                  id="discount"
-                  placeholder="discount..."
-                  onChange={handleInput}
-                  value={state.discount}
-                />
-                <div className="text-2xl text-gray-400">%</div>
+              <div className=" justify-center items-center gap-3">
+                <div className="flex">
+                  <input
+                    type="number"
+                    name="discount"
+                    className="w-full text-sm rounded border focus:border-green-700 focus:border-2 block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white outline-none"
+                    id="discount"
+                    placeholder="discount..."
+                    {...register("discount", {
+                      min: {
+                        value: 10000,
+                        message: "Discount is not valid",
+                      },
+                      pattern: {
+                        value: /^[0-9]*$/,
+                        message: "Discount is not valid.",
+                      },
+                    })}
+                  />
+                  <div className="text-2xl text-gray-400">%</div>
+                </div>
+                {errors.discount && (
+                  <span className="text-err text-red-700">
+                    {errors.discount.message}
+                  </span>
+                )}
               </div>
             </div>
             <div className="w-full md:w-6/12 p-3">
@@ -196,13 +228,23 @@ const CreateProduct = () => {
                 className="w-full text-sm rounded border focus:border-green-700 focus:border-2 block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white outline-none"
                 id="stock"
                 placeholder="stock..."
-                onChange={handleInput}
-                value={state.stock}
+                {...register("stock", {
+                  required: "Stock is required",
+                  min: {
+                    value: 10000,
+                    message: "Stock is not valid",
+                  },
+                  pattern: {
+                    value: /^[0-9]*$/,
+                    message: "Stock is not valid.",
+                  },
+                })}
               />
-              <p className="mt-2 text-sm text-red-600 dark:text-red-500">
-                <span className="font-medium">Oh, Stock!</span> Cannot be left
-                blank.
-              </p>
+              {errors.stock && (
+                <span className="text-err text-red-700">
+                  {errors.stock.message}
+                </span>
+              )}
             </div>
             <div className="w-full md:w-6/12 p-3">
               <label
@@ -218,9 +260,10 @@ const CreateProduct = () => {
                       name="category"
                       id="categories"
                       className="w-full text-sm rounded border focus:border-green-700 focus:border-2 block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white outline-none"
-                      data-te-select-init
-                      onChange={handleInput}
-                      value={state.category}
+                      // data-te-select-init
+                      {...register("category", {
+                        required: "Please choose category",
+                      })}
                     >
                       <option value="">Choose category</option>
                       {data?.categories?.map((category) => (
@@ -229,10 +272,11 @@ const CreateProduct = () => {
                         </option>
                       ))}
                     </select>
-                    <p className="mt-2 text-sm text-red-600 dark:text-red-500">
-                      <span className="font-medium">Oh, Category!</span> Cannot
-                      be left blank.
-                    </p>
+                    {errors.category && (
+                      <span className="text-err text-red-700">
+                        {errors.category.message}
+                      </span>
+                    )}
                   </>
                 )
               ) : (
@@ -246,7 +290,18 @@ const CreateProduct = () => {
               >
                 Choose colors
               </label>
-              <TwitterPicker onChangeComplete={saveColors} />
+              <TwitterPicker
+                onChangeComplete={saveColors}
+                name="color"
+                {...register("color", {
+                  required: "Please choose color",
+                })}
+              />
+              {errors.color && (
+                <span className="text-err text-red-700">
+                  {errors.color.message}
+                </span>
+              )}
             </div>
 
             <div className="w-full p-3">
@@ -262,12 +317,21 @@ const CreateProduct = () => {
                     <div
                       key={size.name}
                       className="size"
+                      name="size"
                       onClick={() => chooseSize(size)}
+                      {...register("size", {
+                        required: "Please choose size",
+                      })}
                     >
                       {size.name}
                     </div>
                   ))}
                 </div>
+              )}
+              {errors.size && (
+                <span className="text-err text-red-700">
+                  {errors.size.message}
+                </span>
               )}
             </div>
             <div className="w-full p-3">
@@ -306,20 +370,9 @@ const CreateProduct = () => {
                       SVG, PNG, JPG or GIF (MAX. 800x400px)
                     </p>
                   </div>
-                  <input
-                    id="dropzone-file"
-                    type="file"
-                    className="hidden"
-                    name="images"
-                    onChange={imageHandle}
-                    multiple
-                  />
+                  <input id="dropzone-file" type="file" className="hidden" />
                 </label>
               </div>
-              <p className="mt-2 text-sm text-red-600 dark:text-red-500">
-                <span className="font-medium">Oh, Category!</span> Cannot be
-                left blank.
-              </p>
             </div>
 
             <div className="w-full p-3">
@@ -335,15 +388,25 @@ const CreateProduct = () => {
                 value={value}
                 onChange={setValue}
                 placeholder="Description..."
+                {...register("description", {
+                  required: "Oh, Product's description! Can not be left blank.",
+                })}
               />
+              {errors.description && (
+                <span className="text-err text-red-700">
+                  {errors.description.message}
+                </span>
+              )}
             </div>
             <div className="w-full px-3 mt-3">
-              <input
-                type="submit"
-                value={response.isLoading ? "loading..." : "Save Product"}
-                disabled={response.isLoading ? true : false}
-                className="px-5 py-3 bg-[#242424] rounded-md hover:bg-green-700 flex justify-center items-center gap-2 hover:cursor-pointer"
-              />
+              <button>
+                <input
+                  type="submit"
+                  value={response.isLoading ? "loading..." : "Save Product"}
+                  disabled={response.isLoading ? true : false}
+                  className="px-5 py-3 bg-[#242424] rounded-md hover:bg-green-700 flex justify-center items-center gap-2 hover:cursor-pointer"
+                />
+              </button>
             </div>
           </div>
         </form>

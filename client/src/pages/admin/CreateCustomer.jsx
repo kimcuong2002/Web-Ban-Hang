@@ -5,13 +5,14 @@ import ScreenHeader from "../../components/ScreenHeader";
 import Wrapper from "./Wrapper";
 import { useCreateCustomerMutation } from "../../redux/services/authService";
 import { setSuccess } from "../../redux/reducers/globalReducer";
-
 import { BsArrowLeftShort } from "react-icons/bs";
 import ImagesPreview from "../../components/ImagesPreview";
 import { showError } from "../../utils/ShowError";
+import { useForm } from "react-hook-form";
+import initialavatar from "../../assets/img/initialavatar.jpg";
 
-const CreateCustomer = () => {
-  const [errors, setErrors] = useState([]);
+const CreateCustomer = ({ onSubmit }) => {
+  const [error, setErrors] = useState([]);
   const [state, setState] = useState({
     fullname: "",
     username: "",
@@ -22,10 +23,22 @@ const CreateCustomer = () => {
   });
   const [preview, setPreview] = useState([]);
 
-  const handleInput = (e) => {
-    setState({ ...state, [e.target.name]: e.target.value });
-  };
   const [saveCustomer, data] = useCreateCustomerMutation();
+
+  const [previewAvatar, setPreviewAvatar] = useState("");
+  const [errorAvatar, setErrorAvatar] = useState("");
+
+  useEffect(() => {
+    return () => {
+      previewAvatar && URL.revokeObjectURL(previewAvatar);
+    };
+  }, [previewAvatar]);
+
+  const handleChooseAvatar = (e) => {
+    const file = e.target.files[0];
+    setPreviewAvatar(URL.createObjectURL(file));
+    setErrorAvatar("");
+  };
 
   // const errors = data?.error?.data?.errors ? data?.error?.data?.errors : [];
 
@@ -67,6 +80,19 @@ const CreateCustomer = () => {
     }
   }, [data?.isSuccess]);
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const handleSubmitCustomer = (data) => {
+    if (!previewAvatar) {
+      return setErrorAvatar("Please choose avatar");
+    }
+    console.log(data);
+  };
+
   return (
     <Wrapper>
       <ScreenHeader>
@@ -77,7 +103,10 @@ const CreateCustomer = () => {
           </button>
         </Link>
       </ScreenHeader>
-      <form className="w-full md:w-full" onSubmit={submitCustomer}>
+      <form
+        className="w-full md:w-full"
+        onSubmit={handleSubmit(handleSubmitCustomer)}
+      >
         <div className="flex flex-wrap">
           <div className="w-full md:w-6/12 p-3">
             <label
@@ -90,18 +119,17 @@ const CreateCustomer = () => {
               type="text"
               name="username"
               className={`text-sm rounded border focus:border-green-700 focus:border-2 block w-full p-2.5 bg-gray-700 text-white outline-none ${
-                showError(errors, "username")
+                showError(error, "username")
                   ? "border-red-600 placeholder-red-300"
                   : "border-gray-600 placeholder-gray-400"
               }`}
               placeholder="Username..."
-              value={state.username}
-              onChange={handleInput}
+              {...register("name", { required: "Name is required" })}
             />
-            {showError(errors, "username") && (
-              <p className="mt-2 text-sm text-red-600 dark:text-red-500 font-medium">
-                * {showError(errors, "username")}!
-              </p>
+            {errors.name && (
+              <span className="text-err text-red-700">
+                {errors.name.message}
+              </span>
             )}
           </div>
           <div className="w-full md:w-6/12 p-3">
@@ -115,18 +143,23 @@ const CreateCustomer = () => {
               type="password"
               name="password"
               className={`text-sm rounded border focus:border-green-700 focus:border-2 block w-full p-2.5 bg-gray-700 text-white outline-none ${
-                showError(errors, "password")
+                showError(error, "password")
                   ? "border-red-600 placeholder-red-300"
                   : "border-gray-600 placeholder-gray-400"
               }`}
               placeholder="Password..."
-              value={state.password}
-              onChange={handleInput}
-            />
-            {showError(errors, "password") && (
-              <p className="mt-2 text-sm text-red-600 dark:text-red-500 font-medium">
-                * {showError(errors, "password")}!
-              </p>
+              {...register("password", {
+                required: "Password is not required",
+                minLength: {
+                  value: 6,
+                  message: "Password is not valid",
+                },
+              })}
+            />{" "}
+            {errors.password && (
+              <span className="text-err text-red-700">
+                {errors.password.message}
+              </span>
             )}
           </div>
           <div className="w-full p-3">
@@ -140,18 +173,19 @@ const CreateCustomer = () => {
               type="text"
               name="fullname"
               className={`text-sm rounded border focus:border-green-700 focus:border-2 block w-full p-2.5 bg-gray-700 text-white outline-none ${
-                showError(errors, "fullname")
+                showError(error, "fullname")
                   ? "border-red-600 placeholder-red-300"
                   : "border-gray-600 placeholder-gray-400"
               }`}
               placeholder="Fullname..."
-              value={state.fullname}
-              onChange={handleInput}
+              {...register("fullname", {
+                required: "Fullname is not required",
+              })}
             />
-            {showError(errors, "fullname") && (
-              <p className="mt-2 text-sm text-red-600 dark:text-red-500 font-medium">
-                * {showError(errors, "fullname")}!
-              </p>
+            {errors.fullname && (
+              <span className="text-err text-red-700">
+                {errors.fullname.message}
+              </span>
             )}
           </div>
           <div className="w-full md:w-8/12 p-3">
@@ -166,13 +200,18 @@ const CreateCustomer = () => {
               name="email"
               className="text-sm rounded border focus:border-green-700 focus:border-2 block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white outline-none"
               placeholder="Email..."
-              value={state.email}
-              onChange={handleInput}
+              {...register("email", {
+                required: "Email is not required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Email is not valid",
+                },
+              })}
             />
-            {showError(errors, "email") && (
-              <p className="mt-2 text-sm text-red-600 dark:text-red-500 font-medium">
-                * {showError(errors, "email")}!
-              </p>
+            {errors.email && (
+              <span className="text-err text-red-700">
+                {errors.email.message}
+              </span>
             )}
           </div>
           <div className="w-full md:w-4/12 p-3">
@@ -201,14 +240,14 @@ const CreateCustomer = () => {
               </div>
             </div>
           </div>
-          <div className="w-full p-3">
+          {/* <div className="w-full p-3">
             <label
               htmlFor="Avatar"
               className="label block mb-2 text-sm text-gray-400"
             >
               Avatar
             </label>
-            <div className="flex items-center justify-center w-full">
+            <div className="flex flex-col items-center justify-center w-full">
               <label
                 htmlFor="dropzone-file"
                 className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
@@ -243,22 +282,73 @@ const CreateCustomer = () => {
                   className="hidden"
                   name="avatar"
                   onChange={imageHandle}
+                  {...register("avatar", {
+                    required: "Please choose your avatar",
+                  })}
                 />
               </label>
+              {errors.avatar && (
+                <span className="text-err text-left text-red-700">
+                  {errors.avatar.message}
+                </span>
+              )}
             </div>
           </div>
           <div className="mb-3">
             <ImagesPreview url={preview.avatar} heading="Avatar" />
+          </div> */}
+          <div className="my-[50px]">
+            {previewAvatar ? (
+              <img
+                src={previewAvatar}
+                alt=""
+                className="h-[200px] w-[200px] rounded-[50%] object-cover"
+              />
+            ) : (
+              <div>
+                <img
+                  src={initialavatar}
+                  alt=""
+                  className="h-[200px] w-[200px] rounded-[50%] object-cover"
+                />
+              </div>
+            )}
+            <input
+              type="file"
+              onChange={handleChooseAvatar}
+              className="mt-[10px]
+                file:bg-gradient-to-b file:from-blue-500 file:to-blue-600
+                file:px-3 file:py-1 file:m-5
+                file:border-none
+                file:rounded-full
+                file:text-white
+                file:cursor-pointer
+                file:shadow-lg file:shadow-blue-600/50
+                
+                bg-gradient-to-br from-gray-600 to-gray-700
+                text-white/80
+                rounded-full
+                cursor-pointer 
+                shadow-xl shadow-gray-700/60
+                "
+            />
+            {errorAvatar && (
+              <div className="h-[50px]">
+                <p className="text-md text-red-500 pl-5">{errorAvatar}</p>
+              </div>
+            )}
           </div>
+          {/* </div> */}
         </div>
-
         <div className="mb-3 mx-3">
-          <input
-            type="submit"
-            value={data.isLoading ? "loading..." : "Create Customer"}
-            disabled={data.isLoading ? true : false}
-            className="px-5 py-3 bg-[#242424] rounded-md hover:bg-green-700 flex justify-center items-center gap-2 hover:cursor-pointer"
-          />
+          <button>
+            <input
+              type="submit"
+              value={data.isLoading ? "loading..." : "Create Customer"}
+              disabled={data.isLoading ? true : false}
+              className="px-5 py-3 bg-[#242424] rounded-md hover:bg-green-700 flex justify-center items-center gap-2 hover:cursor-pointer"
+            />
+          </button>
         </div>
       </form>
     </Wrapper>
