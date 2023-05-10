@@ -13,6 +13,7 @@ import {
   removeItem,
 } from "../redux/reducers/cartReducer";
 import { useSendPaymentMutation } from "../redux/services/paymentService";
+import {useUpdateOrderMutation} from "../redux/services/userOrdersService";
 import Modal from "../components/Modal";
 
 const Cart = () => {
@@ -20,6 +21,7 @@ const Cart = () => {
   const { cart, total } = useSelector((state) => state.cartReducer);
   const { userToken, user } = useSelector((state) => state.authReducer);
   const dispatch = useDispatch();
+  const [updateOrder] = useUpdateOrderMutation();
   const inc = (i) => {
     dispatch(incQuantity(i));
   };
@@ -32,6 +34,12 @@ const Cart = () => {
       dispatch(removeItem(id));
     }
   };
+  useEffect(() => {
+    const id = localStorage.getItem('orderId');
+    updateOrder({id: id, body: {
+      cart: cart
+    }})
+  }, [cart])
   const navigate = useNavigate();
   const [doPayment, response] = useSendPaymentMutation();
   // console.log("payment response", response);

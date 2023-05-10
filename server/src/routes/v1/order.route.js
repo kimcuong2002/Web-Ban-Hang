@@ -23,6 +23,6 @@ router
 router
   .route("/:id")
   .get(Authorization.authorized, orderController.orderDetail)
-  .patch(Authorization.authorized, orderController.updateOrder);
+  .put(Authorization.authorized, orderController.updateOrder);
 
 module.exports = router;

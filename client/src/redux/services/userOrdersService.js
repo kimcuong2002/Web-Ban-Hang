@@ -23,6 +23,15 @@ const userOrdersService = createApi({
           };
         },
       }),
+      updateOrder: builder.mutation({
+        query: (data) => {
+          return {
+            url: `/orders/${data.id}`, 
+            method: "PUT", 
+            body: data.body,
+          }
+        }
+      }),
       getOrders: builder.query({
         query: (data) => {
           return {
@@ -65,6 +74,7 @@ const userOrdersService = createApi({
 });
 export const {
   useCreateOrderMutation,
+  useUpdateOrderMutation,
   useGetOrdersQuery,
   useDetailsQuery,
   useReceivedOrderMutation,

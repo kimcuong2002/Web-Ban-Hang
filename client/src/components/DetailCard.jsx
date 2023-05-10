@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import currency from "currency-formatter";
 import { motion } from "framer-motion";
 import h2p from "html2plaintext";
@@ -12,7 +12,7 @@ import { discount } from "../utils/discount";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow, Pagination } from "swiper";
 import { Navigation } from "swiper";
-import { useCreateOrderMutation } from "../redux/services/userOrdersService";
+import { useCreateOrderMutation, useUpdateOrderMutation } from "../redux/services/userOrdersService";
 
 const DetailsCard = ({ product }) => {
   const [sizeState, setSizeState] = useState(
@@ -22,6 +22,7 @@ const DetailsCard = ({ product }) => {
     product?.colors?.length > 0 && product.colors[0]
   );
   const [quantity, setQuantity] = useState(1);
+  const [idOrder, setIdOrder] = useState('');
   const inc = () => {
     setQuantity(quantity + 1);
   };
@@ -33,16 +34,24 @@ const DetailsCard = ({ product }) => {
   const [imageRenderDetail, setImageRenderDetail] = useState(0);
 
   const { user } = useSelector((state) => state.authReducer);
-  console.log(user);
   const { statusOrder } = useSelector((state) => state.orderReducer);
 
-  const [createOrder, response] = useCreateOrderMutation();
+  const [createOrder, res] = useCreateOrderMutation();
+  const [updateOrder, response] = useUpdateOrderMutation();
 
   const handlePreviewProdduct = (index) => {
     setImageRenderDetail(index);
   };
 
   console.log("------", response);
+
+  useEffect(() => {
+    if(res?.isSuccess) {
+      setIdOrder(res?.data?.order.id);
+      localStorage.setItem('orderId', res?.data?.order.id);
+    }
+  }, [res?.isSuccess])
+
 
   const discountPrice = discount(product.price, product.discount);
   let desc = h2p(product.description);
@@ -68,7 +77,6 @@ const DetailsCard = ({ product }) => {
         item.size === newProduct.size &&
         item.color === newProduct.color
     );
-    console.log(cartItems);
     if (cartItems.length === 0) {
       dispatch(addCart(newProduct));
       cartItems.push(newProduct);
@@ -79,19 +87,20 @@ const DetailsCard = ({ product }) => {
         address: "empty",
         phone: "empty",
         status: statusOrder,
-        cart: [
-          {
-            productId: newProduct.id,
-            size: newProduct.size,
-            color: newProduct.color,
-            quantity: newProduct.quantity,
-          },
-        ],
+        cart: [newProduct] 
       });
     } else {
       if (!checkItem) {
         dispatch(addCart(newProduct));
         cartItems.push(newProduct);
+        const result = {
+        userId: user?.id,
+        address: "empty",
+        phone: "empty",
+        status: statusOrder,
+        cart: cartItems 
+      }
+        updateOrder({id: idOrder, body: result})
         localStorage.setItem("cart", JSON.stringify(cartItems));
         toast.success(`${newProduct.name} successfully added to cart`);
       } else {

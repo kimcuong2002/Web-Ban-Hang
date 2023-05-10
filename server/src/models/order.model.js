@@ -7,26 +7,49 @@ const orderSchema = Schema(
       type: Types.ObjectId,
       ref: "User",
     },
-    cart: [
+    cart: {
+      type: [
+  {
+    name: {
+      type: String,
+    },
+    price: {
+      type: Number,
+    },
+    discount: {
+      type: Number,
+    },
+    stock: {
+      type: Number,
+    },
+    category: {
+      type: Types.ObjectId,
+      ref: "Category",
+    },
+    quantity: {
+      type: Number
+    },
+    color: {
+        type: String,
+    },
+    sizes: 
       {
-        productId: {
-          type: Types.ObjectId,
-          ref: "Product",
-        },
-        size: {
-          type: String,
-          required: true,
-        },
-        color: {
-          type: String,
-          required: true,
-        },
-        quantity: {
-          type: Number,
-          required: true,
-        },
+        type: String,
+      },
+    images: [
+      {
+        type: String,
+        required: true,
       },
     ],
+    description: {
+      type: String,
+    },
+    reviews: [{ type: Types.ObjectId, ref: "review" }],
+  }
+      ],
+      _id: false
+    } ,
     address: {
       type: String,
       required: true,
