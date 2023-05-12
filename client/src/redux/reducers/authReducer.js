@@ -34,6 +34,7 @@ const authReducer = createSlice({
     },
     logout: (state, { payload }) => {
       localStorage.removeItem(payload);
+      localStorage.removeItem("orderId");
       if (payload === "admin-token") {
         state.adminToken = null;
       } else if (payload === "userToken") {

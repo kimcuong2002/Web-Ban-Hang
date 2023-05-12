@@ -12,7 +12,10 @@ import { discount } from "../utils/discount";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow, Pagination } from "swiper";
 import { Navigation } from "swiper";
-import { useCreateOrderMutation, useUpdateOrderMutation } from "../redux/services/userOrdersService";
+import {
+  useCreateOrderMutation,
+  useUpdateOrderMutation,
+} from "../redux/services/userOrdersService";
 
 const DetailsCard = ({ product }) => {
   const [sizeState, setSizeState] = useState(
@@ -22,7 +25,7 @@ const DetailsCard = ({ product }) => {
     product?.colors?.length > 0 && product.colors[0]
   );
   const [quantity, setQuantity] = useState(1);
-  const [idOrder, setIdOrder] = useState('');
+  const [idOrder, setIdOrder] = useState("");
   const inc = () => {
     setQuantity(quantity + 1);
   };
@@ -43,15 +46,12 @@ const DetailsCard = ({ product }) => {
     setImageRenderDetail(index);
   };
 
-  console.log("------", response);
-
   useEffect(() => {
-    if(res?.isSuccess) {
+    if (res?.isSuccess) {
       setIdOrder(res?.data?.order.id);
-      localStorage.setItem('orderId', res?.data?.order.id);
+      localStorage.setItem("orderId", res?.data?.order.id);
     }
-  }, [res?.isSuccess])
-
+  }, [res?.isSuccess]);
 
   const discountPrice = discount(product.price, product.discount);
   let desc = h2p(product.description);
@@ -87,20 +87,25 @@ const DetailsCard = ({ product }) => {
         address: "empty",
         phone: "empty",
         status: statusOrder,
-        cart: [newProduct] 
+        cart: [newProduct],
       });
     } else {
       if (!checkItem) {
         dispatch(addCart(newProduct));
         cartItems.push(newProduct);
         const result = {
-        userId: user?.id,
-        address: "empty",
-        phone: "empty",
-        status: statusOrder,
-        cart: cartItems 
-      }
-        updateOrder({id: idOrder, body: result})
+          userId: user?.id,
+          address: "empty",
+          phone: "empty",
+          status: statusOrder,
+          cart: cartItems,
+        };
+        const id = localStorage.getItem("orderId");
+        if (idOrder) {
+          updateOrder({ id: idOrder, body: result });
+        } else {
+          updateOrder({ id: id, body: result });
+        }
         localStorage.setItem("cart", JSON.stringify(cartItems));
         toast.success(`${newProduct.name} successfully added to cart`);
       } else {
@@ -143,6 +148,7 @@ const DetailsCard = ({ product }) => {
         >
           {product.images.map((image, index) => (
             <SwiperSlide
+              key={index}
               className="w-[350px]"
               onClick={() => handlePreviewProdduct(index)}
             >

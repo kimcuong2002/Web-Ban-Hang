@@ -9,47 +9,46 @@ const orderSchema = Schema(
     },
     cart: {
       type: [
-  {
-    name: {
-      type: String,
-    },
-    price: {
-      type: Number,
-    },
-    discount: {
-      type: Number,
-    },
-    stock: {
-      type: Number,
-    },
-    category: {
-      type: Types.ObjectId,
-      ref: "Category",
-    },
-    quantity: {
-      type: Number
-    },
-    color: {
-        type: String,
-    },
-    sizes: 
-      {
-        type: String,
-      },
-    images: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
-    description: {
-      type: String,
-    },
-    reviews: [{ type: Types.ObjectId, ref: "review" }],
-  }
+        {
+          name: {
+            type: String,
+          },
+          price: {
+            type: Number,
+          },
+          discount: {
+            type: Number,
+          },
+          stock: {
+            type: Number,
+          },
+          category: {
+            type: Types.ObjectId,
+            ref: "Category",
+          },
+          quantity: {
+            type: Number,
+          },
+          color: {
+            type: String,
+          },
+          size: {
+            type: String,
+          },
+          images: [
+            {
+              type: String,
+              required: true,
+            },
+          ],
+          description: {
+            type: String,
+          },
+          reviews: [{ type: Types.ObjectId, ref: "review" }],
+        },
       ],
-      _id: false
-    } ,
+      _id: false,
+    },
     address: {
       type: String,
       required: true,

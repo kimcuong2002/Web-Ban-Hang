@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { discount } from "../../utils/discount";
 const cartData = localStorage.getItem("cart");
 const cartArray = cartData ? JSON.parse(cartData) : [];
+
 function allItems(data) {
   let items = 0;
   for (let i = 0; i < data.length; i++) {
@@ -62,8 +63,22 @@ const cartReducer = createSlice({
       state.items = 0;
       state.total = 0;
     },
+    setCart: (state, { payload }) => {
+      localStorage.setItem("cart", JSON.stringify(payload));
+      state.cart = payload;
+    },
+    setTotal: (state, { payload }) => {
+      state.total = payload;
+    },
   },
 });
-export const { addCart, incQuantity, decQuantity, removeItem, emptyCart } =
-  cartReducer.actions;
+export const {
+  addCart,
+  incQuantity,
+  decQuantity,
+  removeItem,
+  emptyCart,
+  setCart,
+  setTotal,
+} = cartReducer.actions;
 export default cartReducer.reducer;

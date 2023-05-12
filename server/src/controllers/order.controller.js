@@ -21,9 +21,17 @@ const getOrderByUser = async (req, res) => {
   const errors = validationResult(req);
 
   if (errors.isEmpty()) {
-    const order = await Order.find({ userId: req.query.userId });
+    console.log(req.params);
+    const order = await Order.find({ userId: req.params.id });
 
-    return res.status(200).json({ order });
+    if (order.length === 0) {
+      return res.status(200).json({ order });
+    } else {
+      const result = order.filter(
+        (item) => item.cart.length !== 0 && item.status !== 1
+      );
+      return res.status(200).json({ order: result });
+    }
   } else {
     return res.status(400).json({ errors: errors.array() });
   }
@@ -106,6 +114,30 @@ const updateOrder = async (req, res) => {
   }
 };
 
+const deleteOrder = async (req, res) => {
+  const errors = validationResult(req);
+  if (errors.isEmpty()) {
+    const { id } = req.params;
+
+    try {
+      const order = await Order.findById(id);
+
+      if (order) {
+        await order.remove();
+        return res.status(200).json({ msg: "Order has deleted" });
+      } else {
+        return res.status(404).json({ message: "Order not found" });
+      }
+    } catch (error) {
+      console.log(error.message);
+      return res.status(500).json({ errors: error });
+    }
+  } else {
+    console.log(errors.message);
+    return res.status(400).json({ errors: errors.array() });
+  }
+};
+
 const createRating = async (req, res) => {
   const errors = validationResult(req);
   const { rating, message, user, product, id } = req.body;
@@ -123,7 +155,7 @@ const createRating = async (req, res) => {
       await Order.findByIdAndUpdate(id, { review: true });
       await Product.findOneAndUpdate(
         { _id: product },
-        { $push: { reviews: createdReview._id } },
+        { $push: { reviews: createdReview._id } }
       );
       return res.status(201).json({ msg: "Review has created successfully" });
     } catch (error) {
@@ -138,6 +170,7 @@ module.exports = {
   paginate,
   orderDetail,
   updateOrder,
+  deleteOrder,
   createRating,
   createOrder,
   getOrderByUser,

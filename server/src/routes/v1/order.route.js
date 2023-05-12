@@ -23,6 +23,11 @@ router
 router
   .route("/:id")
   .get(Authorization.authorized, orderController.orderDetail)
-  .put(Authorization.authorized, orderController.updateOrder);
+  .put(Authorization.authorized, orderController.updateOrder)
+  .delete(Authorization.authorized, orderController.deleteOrder);
+
+router
+  .route("/user/:id")
+  .get(Authorization.authorized, orderController.getOrderByUser);
 
 module.exports = router;

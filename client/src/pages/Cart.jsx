@@ -7,21 +7,88 @@ import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import { discount } from "../utils/discount";
 import Quantity from "../components/Quantity";
+import { setCart, setTotal } from "../redux/reducers/cartReducer";
 import {
   incQuantity,
   decQuantity,
   removeItem,
 } from "../redux/reducers/cartReducer";
 import { useSendPaymentMutation } from "../redux/services/paymentService";
-import {useUpdateOrderMutation} from "../redux/services/userOrdersService";
+import {
+  useUpdateOrderMutation,
+  useGetOrderByIdUserQuery,
+  useDeleteOrderMutation,
+  useCreateOrderMutation,
+} from "../redux/services/userOrdersService";
 import Modal from "../components/Modal";
 
 const Cart = () => {
   const [openModal, setOpenModal] = useState(false);
   const { cart, total } = useSelector((state) => state.cartReducer);
+  const { statusOrder } = useSelector((state) => state.orderReducer);
   const { userToken, user } = useSelector((state) => state.authReducer);
   const dispatch = useDispatch();
   const [updateOrder] = useUpdateOrderMutation();
+  const [deleteOrder] = useDeleteOrderMutation();
+  const [createOrder, res] = useCreateOrderMutation();
+  const { data } = useGetOrderByIdUserQuery(user?.id);
+  useEffect(() => {
+    if (user && data) {
+      const cartLocal = JSON.parse(localStorage.getItem("cart"));
+      if (!data.order.length) return [];
+      let arr = data.order[0].cart;
+      if (!cartLocal) {
+        for (let i = 1; i < data?.order.length; i++) {
+          for (let j = 0; j < data?.order[i].cart.length; j++) {
+            const product = data?.order[i]?.cart[j];
+            const index = arr.findIndex(
+              (item) =>
+                item.name === product?.name &&
+                item.color === product?.color &&
+                item.size === product?.size
+            );
+            if (index === -1) {
+              arr = [...arr, product];
+            }
+          }
+        }
+      } else {
+        for (let i = 1; i < data?.order.length; i++) {
+          for (let j = 0; j < data?.order[i].cart.length; j++) {
+            const product = data?.order[i]?.cart[j];
+            const index = arr.findIndex(
+              (item) =>
+                item.name === product?.name &&
+                item.color === product?.color &&
+                item.size === product?.size
+            );
+            if (index === -1) {
+              arr = [...arr, product];
+            }
+          }
+        }
+        for (const cart of cartLocal) {
+          const index = arr.findIndex(
+            (item) =>
+              item.name === cart.name &&
+              item.color === cart.color &&
+              item.size === cart.size
+          );
+          if (index === -1) {
+            arr = [...arr, cart];
+          }
+        }
+      }
+      let total = 0;
+      for (let a of arr) {
+        a = { ...a, quantity: 1 };
+        total += discount(a.price, a.discount);
+      }
+      dispatch(setCart(arr));
+      dispatch(setTotal(total));
+    }
+  }, [user]);
+
   const inc = (i) => {
     dispatch(incQuantity(i));
   };
@@ -34,12 +101,37 @@ const Cart = () => {
       dispatch(removeItem(id));
     }
   };
+
   useEffect(() => {
-    const id = localStorage.getItem('orderId');
-    updateOrder({id: id, body: {
-      cart: cart
-    }})
-  }, [cart])
+    const id = localStorage.getItem("orderId");
+    if (id) {
+      if (cart.length) {
+        updateOrder({
+          id: id,
+          body: {
+            cart: cart,
+          },
+        });
+      } else {
+        deleteOrder(id);
+        localStorage.removeItem("orderId");
+      }
+    } else if (cart.length) {
+      createOrder({
+        userId: user?.id,
+        address: "empty",
+        phone: "empty",
+        status: statusOrder,
+        cart: cart,
+      });
+    }
+  }, [cart]);
+
+  useEffect(() => {
+    if (res?.isSuccess) {
+      localStorage.setItem("orderId", res?.data?.order.id);
+    }
+  }, [res?.isSuccess]);
   const navigate = useNavigate();
   const [doPayment, response] = useSendPaymentMutation();
   // console.log("payment response", response);

@@ -39,7 +39,6 @@ const LoginForm = () => {
       setErrors(response?.error?.data?.errors);
     }
   }, [response?.error?.data]);
-  console.log(response);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
