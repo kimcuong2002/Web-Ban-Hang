@@ -83,12 +83,7 @@ const AdminOrder = () => {
                         />
                       </td>
                       <td className="p-3 capitalize text-sm font-normal text-gray-400">
-                        <Link
-                          to={`/admin/update-category/${category.id}`}
-                          className="btn btn-warning"
-                        >
-                          edit
-                        </Link>
+                        <a className="btn btn-warning">edit</a>
                       </td>
                       <td className="p-3 capitalize text-sm font-normal text-gray-400">
                         <button
@@ -103,7 +98,7 @@ const AdminOrder = () => {
                 </tbody>
               </table>
             </div>
-                 <Pagination
+            <Pagination
               page={parseInt(page)}
               perPage={data.perPage}
               count={data.count}

@@ -101,12 +101,7 @@ const AdminProducts = () => {
                       />
                     </td>
                     <td className="p-3 capitalize text-sm font-normal text-gray-400">
-                      <Link
-                        to={`/admin/edit-product/${product.id}`}
-                        className="btn btn-warning"
-                      >
-                        edit
-                      </Link>
+                      <a className="btn btn-warning">edit</a>
                     </td>
                     <td className="p-3 capitalize text-sm font-normal text-gray-400">
                       <span

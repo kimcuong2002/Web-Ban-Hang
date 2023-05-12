@@ -32,6 +32,7 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import CreateProduct from "./pages/admin/CreateProduct";
+import UpdateProduct from "./pages/admin/UpdateProduct";
 import CreateCategory from "./pages/admin/CreateCategory";
 import UpdateCategory from "./pages/admin/UpdateCategory";
 import AdminOrder from "./pages/admin/AdminOrder";
@@ -85,6 +86,14 @@ function Routers() {
               element={
                 <Private>
                   <CreateProduct />
+                </Private>
+              }
+            />
+            <Route
+              path="edit-product/:id"
+              element={
+                <Private>
+                  <UpdateProduct />
                 </Private>
               }
             />

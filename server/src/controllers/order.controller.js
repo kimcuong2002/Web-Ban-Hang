@@ -28,7 +28,7 @@ const getOrderByUser = async (req, res) => {
       return res.status(200).json({ order });
     } else {
       const result = order.filter(
-        (item) => item.cart.length !== 0 && item.status !== 1
+        (item) => item.cart.length !== 0 && item.status !== "DELIVERED"
       );
       return res.status(200).json({ order: result });
     }

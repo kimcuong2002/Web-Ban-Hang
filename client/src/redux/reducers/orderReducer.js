@@ -8,7 +8,7 @@ const orderReducer = createSlice({
       phone: "",
       address: "",
     },
-    statusOrder: 1,
+    statusOrder: "WAITTING",
   },
   reducers: {
     setInfoUser: (state, action) => {

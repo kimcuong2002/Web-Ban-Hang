@@ -7,7 +7,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { BsCheck2 } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import Quantity from "./Quantity";
-import { addCart } from "../redux/reducers/cartReducer";
+import { addCart, setTotal } from "../redux/reducers/cartReducer";
 import { discount } from "../utils/discount";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow, Pagination } from "swiper";
@@ -38,6 +38,7 @@ const DetailsCard = ({ product }) => {
 
   const { user } = useSelector((state) => state.authReducer);
   const { statusOrder } = useSelector((state) => state.orderReducer);
+  const { cart, total } = useSelector((state) => state.cartReducer);
 
   const [createOrder, res] = useCreateOrderMutation();
   const [updateOrder, response] = useUpdateOrderMutation();
@@ -52,6 +53,13 @@ const DetailsCard = ({ product }) => {
       localStorage.setItem("orderId", res?.data?.order.id);
     }
   }, [res?.isSuccess]);
+
+  useEffect(() => {
+    if (!cart.length) {
+      setIdOrder("");
+      dispatch(setTotal(0));
+    }
+  }, [cart]);
 
   const discountPrice = discount(product.price, product.discount);
   let desc = h2p(product.description);
@@ -84,8 +92,7 @@ const DetailsCard = ({ product }) => {
       toast.success(`${newProduct.name} successfully added to cart`);
       createOrder({
         userId: user?.id,
-        address: "empty",
-        phone: "empty",
+        name: user?.fullname,
         status: statusOrder,
         cart: [newProduct],
       });
@@ -94,17 +101,22 @@ const DetailsCard = ({ product }) => {
         dispatch(addCart(newProduct));
         cartItems.push(newProduct);
         const result = {
-          userId: user?.id,
-          address: "empty",
-          phone: "empty",
-          status: statusOrder,
           cart: cartItems,
         };
         const id = localStorage.getItem("orderId");
         if (idOrder) {
           updateOrder({ id: idOrder, body: result });
         } else {
-          updateOrder({ id: id, body: result });
+          if (id) {
+            updateOrder({ id: id, body: result });
+          } else {
+            createOrder({
+              userId: user?.id,
+              name: user?.fullname,
+              status: statusOrder,
+              cart: cartItems,
+            });
+          }
         }
         localStorage.setItem("cart", JSON.stringify(cartItems));
         toast.success(`${newProduct.name} successfully added to cart`);

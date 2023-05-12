@@ -51,11 +51,16 @@ const orderSchema = Schema(
     },
     address: {
       type: String,
-      required: true,
+    },
+    phone: {
+      type: String,
+    },
+    fullname: {
+      type: String,
     },
     status: {
-      type: Number,
-      default: 1,
+      type: String,
+      default: "WAITTING",
     },
     review: {
       type: Boolean,
