@@ -37,13 +37,13 @@ const getOrderByUser = async (req, res) => {
 };
 
 const paginate = async (req, res) => {
-  const { page, userId } = req.query;
+  const { page } = req.query;
   const perPage = 5;
   const skip = (page - 1) * perPage;
 
   try {
-    const count = await Order.find({ userId: userId }).countDocuments();
-    const response = await Order.find({ userId: userId })
+    const count = await Order.find().countDocuments();
+    const response = await Order.find()
       .skip(skip)
       .limit(perPage)
       .sort({ updatedAt: -1 });
