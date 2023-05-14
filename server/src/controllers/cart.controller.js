@@ -6,7 +6,7 @@ const { Product, Cart } = require("../models");
 
 const createCart = async (req, res) => {
   const errors = validationResult(req);
-
+  console.log(req.body)
   if (errors.isEmpty()) {
     const { body } = req;
 

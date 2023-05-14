@@ -6,7 +6,9 @@ import { ToastContainer } from 'react-toastify';
 
 // Import Swiper styles
 import "swiper/css";
+import "swiper/css/navigation";
 import "swiper/css/pagination";
+import "swiper/css/effect-coverflow";
 import 'sweetalert2/src/sweetalert2.scss'
 import 'react-toastify/dist/ReactToastify.css';
 

@@ -23,8 +23,14 @@ const orderSchema = Schema(
             type: Number,
           },
           category: {
-            type: Types.ObjectId,
-            ref: "Category",
+            name: {
+              type: String,
+            },
+            description: String,
+            image: {
+              type: String,
+              default: "categoryDefault.jpg",
+            },
           },
           quantity: {
             type: Number,

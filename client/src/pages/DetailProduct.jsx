@@ -11,7 +11,7 @@ const DetailProduct = () => {
   const { data, isFetching } = useGetProductQuery(name);
   const breadScrumb = Store.getState().globalReducer.breadCrumb;
   const breadCrumbLocal = JSON.parse(localStorage.getItem("breadCrumbLocal"));
-
+console.log(data)
   return (
     <div className="container w-4/5 pb-10" style={{ margin: "0 auto" }}>
       <div className="my-container mt-5">
