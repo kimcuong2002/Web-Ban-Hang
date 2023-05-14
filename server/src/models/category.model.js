@@ -11,7 +11,7 @@ const categorySchema = mongoose.Schema(
     description: String,
     image: {
       type: String,
-      default: "categoryDefault.png",
+      default: "categoryDefault.jpg",
       required: true,
     },
   },

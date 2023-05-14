@@ -78,7 +78,7 @@ const paymentProcess = async (req, res, next) => {
     success_url: `${process.env.CLIENT}/user?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.CLIENT}/cart`,
   });
-  return res.status(200).json({ url: session.url });
+  res.json({ url: session.url });
 };
 
 const checkOutSession = async (req, res) => {
@@ -89,7 +89,7 @@ const checkOutSession = async (req, res) => {
     event = stripe.webhooks.constructEvent(
       req.rawBody,
       sig,
-      process.env.ENDPOINTSECRET
+      process.env.ENDPOINTSECRET,
     );
     console.log("payment success");
   } catch (err) {

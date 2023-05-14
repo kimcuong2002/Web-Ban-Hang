@@ -75,7 +75,7 @@ const update = async (req, res) => {
 
     if (category) {
       if (file !== undefined) {
-        if (category.image != "categoryDefault.png") {
+        if (category.image != "categoryDefault.jpg") {
           fs.unlinkSync(filePath + category.image);
         }
         req.body.image = file.filename;
@@ -105,7 +105,7 @@ const deleteCategory = async (req, res) => {
     const category = await Category.findById(id);
 
     if (category) {
-      if (category.image != "categoryDefault.png") {
+      if (category.image != "categoryDefault.jpg") {
         fs.unlinkSync(filePath + category.image);
       }
       await Category.findByIdAndDelete(id);

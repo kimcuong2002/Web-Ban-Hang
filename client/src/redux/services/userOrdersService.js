@@ -7,7 +7,7 @@ const userOrdersService = createApi({
     baseUrl: import.meta.env.VITE_API_ENDPOINT,
     prepareHeaders: (headers, { getState }) => {
       const reducers = getState();
-      const token = reducers?.authReducer?.userToken;
+      const token = reducers?.authReducer?.userToken ? reducers?.authReducer?.userToken : reducers?.authReducer?.adminToken;
       headers.set("authorization", token ? `Bearer ${token}` : "");
       return headers;
     },
@@ -33,9 +33,9 @@ const userOrdersService = createApi({
         },
       }),
       getOrders: builder.query({
-        query: (data) => {
+        query: (page) => {
           return {
-            url: `/orders?page=${data.page}&userId=${data.userId}`,
+            url: `/orders?page=${page}`,
             method: "GET",
           };
         },

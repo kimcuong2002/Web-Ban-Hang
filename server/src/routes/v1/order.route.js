@@ -17,7 +17,7 @@ router
   .route("/add-review")
   .post(
     [Authorization.authorized, ratingValidation],
-    orderController.createRating
+    orderController.createRating,
   );
 
 router

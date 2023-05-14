@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import currency from "currency-formatter";
 import { motion } from "framer-motion";
 import h2p from "html2plaintext";
@@ -9,23 +9,17 @@ import { useDispatch, useSelector } from "react-redux";
 import Quantity from "./Quantity";
 import { addCart, setTotal } from "../redux/reducers/cartReducer";
 import { discount } from "../utils/discount";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { EffectCoverflow, Pagination } from "swiper";
-import { Navigation } from "swiper";
-import {
-  useCreateOrderMutation,
-  useUpdateOrderMutation,
-} from "../redux/services/userOrdersService";
+import { useCreateCartMutation, useUpdateCartMutation } from "../redux/services/cartService";
 
 const DetailsCard = ({ product }) => {
   const [sizeState, setSizeState] = useState(
-    product?.sizes?.length > 0 && product.sizes[0]
+    product?.sizes?.length > 0 && product.sizes[0],
   );
   const [colorState, setColorState] = useState(
-    product?.colors?.length > 0 && product.colors[0]
+    product?.colors?.length > 0 && product.colors[0],
   );
   const [quantity, setQuantity] = useState(1);
-  const [idOrder, setIdOrder] = useState("");
+  const [idCart, setIdCart] = useState("");
   const inc = () => {
     setQuantity(quantity + 1);
   };
@@ -34,38 +28,17 @@ const DetailsCard = ({ product }) => {
       setQuantity(quantity - 1);
     }
   };
-  const [imageRenderDetail, setImageRenderDetail] = useState(0);
 
-  const { user } = useSelector((state) => state.authReducer);
-  const { statusOrder } = useSelector((state) => state.orderReducer);
-  const { cart, total } = useSelector((state) => state.cartReducer);
+  const {user} = useSelector((state) => state.authReducer);
+  const {cart} = useSelector(state => state.cartReducer);
+  const [createCart, res] = useCreateCartMutation();
+  const [updateCart, response] = useUpdateCartMutation();
 
-  const [createOrder, res] = useCreateOrderMutation();
-  const [updateOrder, response] = useUpdateOrderMutation();
-
-  const handlePreviewProdduct = (index) => {
-    setImageRenderDetail(index);
-  };
-
-  useEffect(() => {
-    if (res?.isSuccess) {
-      setIdOrder(res?.data?.order.id);
-      localStorage.setItem("orderId", res?.data?.order.id);
-    }
-  }, [res?.isSuccess]);
-
-  useEffect(() => {
-    if (!cart.length) {
-      setIdOrder("");
-      dispatch(setTotal(0));
-    }
-  }, [cart]);
-
+  console.log(res)
   const discountPrice = discount(product.price, product.discount);
   let desc = h2p(product.description);
   desc = htmlParser(desc);
   const dispatch = useDispatch();
-
   const addToCart = () => {
     const {
       ["colors"]: colors,
@@ -83,37 +56,30 @@ const DetailsCard = ({ product }) => {
       (item) =>
         item.id === newProduct.id &&
         item.size === newProduct.size &&
-        item.color === newProduct.color
+        item.color === newProduct.color,
     );
-    if (cartItems.length === 0) {
+    if(cartItems.lenght === 0) {
       dispatch(addCart(newProduct));
       cartItems.push(newProduct);
       localStorage.setItem("cart", JSON.stringify(cartItems));
       toast.success(`${newProduct.name} successfully added to cart`);
-      createOrder({
+      createCart({
         userId: user?.id,
-        name: user?.fullname,
-        status: statusOrder,
         cart: [newProduct],
       });
     } else {
       if (!checkItem) {
         dispatch(addCart(newProduct));
         cartItems.push(newProduct);
-        const result = {
-          cart: cartItems,
-        };
-        const id = localStorage.getItem("orderId");
-        if (idOrder) {
-          updateOrder({ id: idOrder, body: result });
+        const id = localStorage.getItem("cartId");
+        if (idCart) {
+          updateCart({ id: idCart, body: {cart: cartItems} });
         } else {
           if (id) {
-            updateOrder({ id: id, body: result });
+            updateCart({ id: id, body: {cart: cartItems} });
           } else {
-            createOrder({
+            createCart({
               userId: user?.id,
-              name: user?.fullname,
-              status: statusOrder,
               cart: cartItems,
             });
           }
@@ -125,7 +91,22 @@ const DetailsCard = ({ product }) => {
         return;
       }
     }
+    
   };
+
+  useEffect(() => {
+    if (cart.length !== 0) {
+      setIdCart("");
+      dispatch(setTotal(0));
+    }
+  }, [cart]);
+
+  useEffect(() => {
+    if (res?.isSuccess) {
+      setIdCart(res?.data?.cart.id);
+      localStorage.setItem("cartId", res?.data?.cart.id);
+    }
+  }, [res?.isSuccess]);
 
   return (
     <motion.div
@@ -135,53 +116,24 @@ const DetailsCard = ({ product }) => {
     >
       <Toaster />
       <div className="w-full order-2 md:order-1 md:w-6/12 p-5">
-        <img
-          src={`../${import.meta.env.VITE_PATH_IMAGE}/products/${
-            product.images[imageRenderDetail]
-          }`}
-          alt=""
-          className="w-[350px] h-[350px] object-cover mx-auto mb-5"
-        />
-        <Swiper
-          effect={"coverflow"}
-          grabCursor={true}
-          centeredSlides={true}
-          slidesPerView={"auto"}
-          coverflowEffect={{
-            rotate: 50,
-            stretch: 0,
-            depth: 100,
-            modifier: 1,
-            slideShadows: true,
-          }}
-          pagination={true}
-          modules={[EffectCoverflow, Pagination]}
-          className="mySwiper"
-        >
-          {product.images.map((image, index) => (
-            <SwiperSlide
-              key={index}
-              className="w-[350px]"
-              onClick={() => handlePreviewProdduct(index)}
-            >
-              {" "}
-              <img
-                src={`../${import.meta.env.VITE_PATH_IMAGE}/products/${image}`}
-                alt="image"
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
-      {/* <div className="w-full order-2 md:order-1 md:w-6/12 p-5">
         {product.images.length > 0 && (
           <>
-            <div className="flex">
-              
+            <div className="flex flex-wrap -mx-1">
+              {product.images.map((image, index) => (
+                <div key={index} className="w-full sm:w-6/12 p-1">
+                  <img
+                    src={`../${
+                      import.meta.env.VITE_PATH_IMAGE
+                    }/products/${image}`}
+                    alt="image"
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+              ))}
             </div>
           </>
         )}
-      </div> */}
+      </div>
       <div className="w-full order-1 md:order-2 md:w-6/12 p-5">
         <h1 className="text-2xl font-bold text-gray-900 capitalize">
           {product.name}

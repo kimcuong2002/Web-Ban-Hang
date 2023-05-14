@@ -43,15 +43,15 @@ router
   .route("/page/:page")
   .get(Authorization.authorized, productController.paginate);
 
-router.route("/cat-products/:name/:page?").get(homeController.catProducts);
-
-// router.route("/search/:keyword/:page?").get(homeController.catProducts);
-
 router
   .route("/:id")
   .get(productController.findById)
   .delete(productController.deleteProduct)
   // .delete(Authorization.authorized, productController.deleteProduct);
   .patch(upload.array("images"), productController.update);
+
+router.route("/cat-products/:name/:page?").get(homeController.catProducts);
+
+router.route("/search/:keyword/:page?").get(homeController.catProducts);
 
 module.exports = router;

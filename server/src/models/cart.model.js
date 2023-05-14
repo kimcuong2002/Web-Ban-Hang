@@ -1,7 +1,7 @@
 const { Schema, Types, model } = require("mongoose");
 const { toJSON } = require("./plugins");
 
-const orderSchema = Schema(
+const cartSchema = Schema(
   {
     userId: {
       type: Types.ObjectId,
@@ -49,29 +49,16 @@ const orderSchema = Schema(
       ],
       _id: false,
     },
-    address: {
-      type: String,
-    },
-    phone: {
-      type: String,
-    },
-    fullname: {
-      type: String,
-    },
-    status: {
-      type: String,
-      default: "WAITTING",
-    },
   },
   { timestamps: true },
 );
 
 // add plugin that converts mongoose to json
-orderSchema.plugin(toJSON);
+cartSchema.plugin(toJSON);
 
 /**
- * @typedef Order
+ * @typedef Cart
  */
-const Order = model("Order", orderSchema);
+const Cart = model("Cart", cartSchema);
 
-module.exports = Order;
+module.exports = Cart;

@@ -28,12 +28,21 @@ const catProducts = async (req, res) => {
         .populate("category")
         // .populate("reviews")
         .sort({ updatedAt: -1 });
-      return res.status(200).json({
-        products: response,
-        perPage,
-        count,
-        imageCategory: category.image,
-      });
+
+      if (category) {
+        return res.status(200).json({
+          products: response,
+          perPage,
+          count,
+          imageCategory: category.image,
+        });
+      } else {
+        return res.status(200).json({
+          products: response,
+          perPage,
+          count,
+        });
+      }
     } catch (error) {
       console.log(error.message);
     }

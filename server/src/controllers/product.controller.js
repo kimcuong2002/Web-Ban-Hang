@@ -56,6 +56,7 @@ const paginate = async (req, res) => {
 
 const findById = async (req, res) => {
   const { id } = req.params;
+  console.log(req.params);
 
   try {
     const product = await Product.findOne({ _id: id }).populate("category");
