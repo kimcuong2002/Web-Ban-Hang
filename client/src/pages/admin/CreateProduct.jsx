@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { TwitterPicker } from "react-color";
-import { v4 as uuidv4 } from "uuid";
 import ReactQuill from "react-quill";
 import toast, { Toaster } from "react-hot-toast";
 import "react-quill/dist/quill.snow.css";
@@ -10,26 +9,25 @@ import ScreenHeader from "../../components/ScreenHeader";
 import Wrapper from "./Wrapper";
 import Spinner from "../../components/Spinner";
 import Colors from "../../components/Colors";
-import SizesList from "../../components/SizesList";
-import ImagesPreview from "../../components/ImagesPreview";
 import { BsArrowLeftShort } from "react-icons/bs";
 import { useAllCategoriesQuery } from "../../redux/services/categoryService";
 import { useCProductMutation } from "../../redux/services/productService";
 import { setSuccess } from "../../redux/reducers/globalReducer";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
+import ListImagePreview from "../../components/ListImagePreview";
+import {validate} from "../../utils/validate";
 
 const CreateProduct = ({ onSubmit }) => {
   const { data = [], isFetching } = useAllCategoriesQuery();
-  const [value, setValue] = useState("");
+  const [description, setDescription] = useState("");
   const [state, setState] = useState({
     name: "",
     price: 0,
     discount: 0,
     stock: 0,
     category: "",
-    colors: [],
-    images: [],
   });
+  // console.log(data)
   const [sizes] = useState([
     { name: "xsm" },
     { name: "sm" },
@@ -42,53 +40,41 @@ const CreateProduct = ({ onSubmit }) => {
     { name: "4 years" },
     { name: "5 years" },
   ]);
-  const [sizeList, setSizeList] = useState([]);
-  const [preview, setPreview] = useState([]);
 
-  const imageHandle = (e) => {
-    if (e.target.files.length !== 0) {
-      setState({ ...state, [e.target.name]: e.target.files });
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview({ ...preview, [e.target.name]: reader.result });
-      };
-      reader.readAsDataURL(e.target.files[0]);
-    }
-  };
-  const handleInput = (e) => {
-    setState({ ...state, [e.target.name]: e.target.value });
-  };
+  const [colorList, setColorList] = useState([])
+  const [sizeList, setSizeList] = useState([]);
+  const [listImagePreview, setListImagePreview] = useState([])
+  const [files, setFiles] = useState(null)
+
+  const [errorVali, setErrorVali] = useState({
+    size: '',
+    color: '',
+    desc: '', 
+    img: ''
+  })
+
   const saveColors = (color) => {
-    const filtered = state.colors.filter((clr) => clr.color !== color.hex);
-    setState({
-      ...state,
-      colors: [...filtered, { color: color.hex, id: uuidv4() }],
-    });
+    const filtered = colorList.filter((clr) => clr !== color.hex);
+    setColorList([...filtered, color.hex]);
+    setErrorVali({...errorVali, color: ''});
   };
   const deleteColor = (color) => {
-    const filtered = state.colors.filter((clr) => clr.color !== color.color);
-    setState({ ...state, colors: filtered });
+    const filtered = colorList.filter((clr) => clr !== color);
+    setColorList([...filtered]);
+    setErrorVali({...errorVali, color: 'Colors is required'})
   };
   const chooseSize = (sizeObject) => {
-    const filtered = sizeList.filter((size) => size.name !== sizeObject.name);
-    setSizeList([...filtered, sizeObject]);
-  };
-  const deleteSize = (name) => {
-    const filtered = sizeList.filter((size) => size.name !== name);
-    setSizeList(filtered);
+    let result = sizeList;
+    if(result.includes(sizeObject)) {
+      result = result.filter((size) => size.name !== sizeObject.name);
+    } else {
+      result = [...result, sizeObject]
+      
+    }
+    setSizeList([...result]);
+    setErrorVali({...errorVali, size: ''})
   };
   const [createNewProduct, response] = useCProductMutation();
-  //   console.log("Your response", response);
-  const createPro = (e) => {
-    e.preventDefault();
-    // const formData = new FormData();
-    // formData.append("data", JSON.stringify(state));
-    // formData.append("sizes", JSON.stringify(sizeList));
-    // formData.append("description", value);
-    // formData.append("images", state.images);
-    console.log("state: ", state);
-    createNewProduct(state);
-  };
   useEffect(() => {
     if (!response.isSuccess) {
       response?.error?.data?.errors.map((err) => {
@@ -109,9 +95,19 @@ const CreateProduct = ({ onSubmit }) => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+
   const handleSubmitProduct = (data) => {
-    console.log(data);
+    
+    const result = validate(sizeList, colorList, description, listImagePreview)
+    console.log(result)
+    setErrorVali({...errorVali, ...result})
+    if(result.size || result.color || result.desc || result.img) {
+      return;
+    }
+    console.log('data', data)
+    
   };
+
   return (
     <Wrapper>
       <ScreenHeader>
@@ -125,7 +121,7 @@ const CreateProduct = ({ onSubmit }) => {
       <Toaster position="top-right" reverseOrder={true} />
       <div className="flex flex-wrap -mx-3">
         <form
-          className="w-full xl:w-8/12 p-3"
+          className="w-full p-3"
           onSubmit={handleSubmit(handleSubmitProduct)}
         >
           <div className="flex flex-wrap">
@@ -164,10 +160,6 @@ const CreateProduct = ({ onSubmit }) => {
                 placeholder="Price..."
                 {...register("price", {
                   required: "Price is required",
-                  min: {
-                    value: 100000,
-                    message: "Price is not valid!",
-                  },
                   pattern: {
                     value: /^\d*[1-9]\d*$/,
                     message: "Price is not valid!",
@@ -197,8 +189,12 @@ const CreateProduct = ({ onSubmit }) => {
                     placeholder="discount..."
                     {...register("discount", {
                       min: {
-                        value: 10000,
+                        value: 0,
                         message: "Discount is not valid",
+                      },
+                      max: {
+                        value: 100,
+                        message: "Discount is not valid"
                       },
                       pattern: {
                         value: /^[0-9]*$/,
@@ -230,7 +226,7 @@ const CreateProduct = ({ onSubmit }) => {
                 placeholder="stock..."
                 {...register("stock", {
                   required: "Stock is required",
-                  min: {
+                  max: {
                     value: 10000,
                     message: "Stock is not valid",
                   },
@@ -291,20 +287,21 @@ const CreateProduct = ({ onSubmit }) => {
                 Choose colors
               </label>
               <TwitterPicker
-                onChangeComplete={saveColors}
-                name="color"
-                {...register("color", {
-                  required: "Please choose color",
-                })}
+                onChangeComplete={(color) => saveColors(color)}
               />
-              {errors.color && (
+              {errorVali.color && (
                 <span className="text-err text-red-700">
-                  {errors.color.message}
+                  {errorVali.color}
                 </span>
               )}
             </div>
 
-            <div className="w-full p-3">
+            <div className="w-full md:w-6/12 p-3"></div>
+            <div className="w-full md:w-6/12 px-3">
+              <Colors colors={colorList} deleteColor={deleteColor} />
+            </div>
+
+            <div className="w-full px-3">
               <label
                 htmlFor="sizes"
                 className="label block mb-2 text-sm text-gray-400"
@@ -316,21 +313,18 @@ const CreateProduct = ({ onSubmit }) => {
                   {sizes.map((size) => (
                     <div
                       key={size.name}
-                      className="size"
+                      className={sizeList.includes(size) ? 'size-active' : 'size'}
                       name="size"
                       onClick={() => chooseSize(size)}
-                      {...register("size", {
-                        required: "Please choose size",
-                      })}
                     >
                       {size.name}
                     </div>
                   ))}
                 </div>
               )}
-              {errors.size && (
+              {errorVali.size && (
                 <span className="text-err text-red-700">
-                  {errors.size.message}
+                  {errorVali.size}
                 </span>
               )}
             </div>
@@ -341,15 +335,16 @@ const CreateProduct = ({ onSubmit }) => {
               >
                 Images
               </label>
-              <div className="flex items-center justify-center w-full">
+              <ListImagePreview images={listImagePreview} />
+              <div className="flex items-center justify-center w-[150px]">
                 <label
                   htmlFor="dropzone-file"
-                  className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                  className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
                 >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <svg
                       aria-hidden="true"
-                      className="w-10 h-10 mb-3 text-gray-400"
+                      className="w-7 h-7 mb-1 text-gray-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -362,17 +357,23 @@ const CreateProduct = ({ onSubmit }) => {
                         d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                       ></path>
                     </svg>
-                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                      <span className="font-semibold">Click to upload</span> or
-                      drag and drop
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      SVG, PNG, JPG or GIF (MAX. 800x400px)
-                    </p>
+                    
                   </div>
-                  <input id="dropzone-file" type="file" className="hidden" />
+                  <input multiple accept="image/*" id="dropzone-file" type="file" className="hidden" onChange={(e) => {
+                    let result = listImagePreview;
+                    for(let i = 0; i < e.target.files.length; i++) {
+                      result = [...result, URL.createObjectURL(e.target.files[i])]
+                    }
+                    setFiles(e.target.files)
+                    setListImagePreview(result)
+                  }} />
                 </label>
               </div>
+              {errorVali.img && (
+                <span className="text-err text-red-700">
+                  {errorVali.img}
+                </span>
+              )}
             </div>
 
             <div className="w-full p-3">
@@ -385,16 +386,13 @@ const CreateProduct = ({ onSubmit }) => {
               <ReactQuill
                 theme="snow"
                 id="description"
-                value={value}
-                onChange={setValue}
+                value={description}
+                onChange={(value)=> {setDescription(value), setErrorVali({...errorVali, desc: ''})}}
                 placeholder="Description..."
-                {...register("description", {
-                  required: "Oh, Product's description! Can not be left blank.",
-                })}
               />
-              {errors.description && (
+              {errorVali.desc && (
                 <span className="text-err text-red-700">
-                  {errors.description.message}
+                  {errorVali.desc}
                 </span>
               )}
             </div>
@@ -410,17 +408,6 @@ const CreateProduct = ({ onSubmit }) => {
             </div>
           </div>
         </form>
-        <div className="w-full xl:w-4/12 p-3">
-          <div className="mb-3">
-            <Colors colors={state.colors} deleteColor={deleteColor} />
-          </div>
-          <div className="mb-3">
-            <SizesList list={sizeList} deleteSize={deleteSize} />
-          </div>
-          <div className="mb-3">
-            <ImagesPreview url={preview.images} heading="Images" />
-          </div>
-        </div>
       </div>
     </Wrapper>
   );
