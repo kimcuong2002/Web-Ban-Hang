@@ -224,7 +224,7 @@ console.log(data)
             <p className="mt-5 font-semibold text-lg">Product Informations</p>
             <hr className="mt-3" />
             <div className="h-64">
-              <table className="w-full h-full overflow-hidden">
+              <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-300 text-center">
                     <th className="p-3 uppercase text-sm font-medium text-gray-500">
@@ -250,7 +250,7 @@ console.log(data)
                     </th>
                   </tr>
                 </thead>
-                <tbody className="overflow-scroll">
+                <tbody className="overflow-y-scroll h-[300px]">
                   {cart &&
                     cart.map((item, index) => (
                       <tr key={index} className="text-center">
