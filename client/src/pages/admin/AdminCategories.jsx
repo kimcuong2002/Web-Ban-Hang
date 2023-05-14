@@ -103,7 +103,7 @@ const Categories = () => {
                 </tbody>
               </table>
             </div>
-                 <Pagination
+            <Pagination
               page={parseInt(page)}
               perPage={data.perPage}
               count={data.count}

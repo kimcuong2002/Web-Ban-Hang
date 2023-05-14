@@ -10,6 +10,18 @@ import { discount } from '../utils/discount';
 import useToastify from '../hooks/useToatify';
 import Quantity from '../components/Quantity';
 import { setCart, setTotal } from '../redux/reducers/cartReducer';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import currency from 'currency-formatter';
+import { BsTrash } from 'react-icons/bs';
+import { ImCross } from 'react-icons/im';
+import { motion } from 'framer-motion';
+import Swal from 'sweetalert2';
+import { discount } from '../utils/discount';
+import useToastify from '../hooks/useToatify';
+import Quantity from '../components/Quantity';
+import { setCart, setTotal } from '../redux/reducers/cartReducer';
 import {
   incQuantity,
   decQuantity,
@@ -38,7 +50,6 @@ const Cart = () => {
   const [createCart, res] = useCreateCartMutation();
   const [createOrder, resp] = useCreateOrderMutation();
   const { data } = useGetCartByIdUserQuery(user?.id);
-  console.log(data);
   const navigate = useNavigate();
   const [doPayment, response] = useSendPaymentMutation();
   const inc = (i) => {
@@ -217,7 +228,6 @@ const Cart = () => {
                 }
               />
             </div>
-
             <p className="mt-5 font-semibold text-lg">Product Informations</p>
             <hr className="mt-3" />
             <div className="h-[300px] overflow-y-scroll">
@@ -247,59 +257,54 @@ const Cart = () => {
                     </th>
                   </tr>
                 </thead>
-                  <tbody>
-                    {cart &&
-                      cart.map((item, index) => (
-                        <tr key={index} className="text-center">
-                          <td className="p-3 capitalize text-sm font-normal text-gray-700">
-                            <img
-                              src={`/${
-                                import.meta.env.VITE_PATH_IMAGE
-                              }/products/${item.images[0]}`}
-                              alt="image product"
-                              className="w-20 h-20 rounded-md object-cover"
-                            />
-                          </td>
-                          <td className="p-3 capitalize text-sm font-normal text-gray-700">
-                            {item.name}
-                          </td>
-                          <td className="p-3 capitalize text-sm font-normal text-gray-700">
-                            <span
-                              className="block w-[25px] h-[25px] rounded-full"
-                              style={{
-                                backgroundColor: item.color,
-                                margin: '0 auto',
-                              }}
-                            ></span>
-                          </td>
-                          <td className="p-3 capitalize text-sm font-normal text-gray-700">
-                            {item.size}
-                          </td>
-                          <td className="p-3 capitalize text-sm font-normal text-gray-700">
-                            {item.quantity}
-                          </td>
-                          <td className="p-3 capitalize text-sm font-normal text-gray-700">
-                            {currency.format(
-                              discount(item.price, item.discount),
-                              {
-                                code: 'USD',
-                              }
-                            )}
-                          </td>
-                          <td className="p-3 capitalize text-sm font-normal text-gray-700">
-                            {item.quantity *
-                              discount(item.price, item.discount)}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
+                <tbody>
+                  {cart &&
+                    cart.map((item, index) => (
+                      <tr key={index} className="text-center">
+                        <td className="p-3 capitalize text-sm font-normal text-gray-700">
+                          <img
+                            src={`/${
+                              import.meta.env.VITE_PATH_IMAGE
+                            }/products/${item.images[0]}`}
+                            alt="image product"
+                            className="w-20 h-20 rounded-md object-cover"
+                          />
+                        </td>
+                        <td className="p-3 capitalize text-sm font-normal text-gray-700">
+                          {item.name}
+                        </td>
+                        <td className="p-3 capitalize text-sm font-normal text-gray-700">
+                          <span
+                            className="block w-[25px] h-[25px] rounded-full"
+                            style={{
+                              backgroundColor: item.color,
+                              margin: '0 auto',
+                            }}
+                          ></span>
+                        </td>
+                        <td className="p-3 capitalize text-sm font-normal text-gray-700">
+                          {item.size}
+                        </td>
+                        <td className="p-3 capitalize text-sm font-normal text-gray-700">
+                          {item.quantity}
+                        </td>
+                        <td className="p-3 capitalize text-sm font-normal text-gray-700">
+                          {currency.format(
+                            discount(item.price, item.discount),
+                            {
+                              code: 'USD',
+                            }
+                          )}
+                        </td>
+                        <td className="p-3 capitalize text-sm font-normal text-gray-700">
+                          {item.quantity * discount(item.price, item.discount)}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
               </table>
             </div>
-            <div className="w-full flex justify-end items-center gap-x-[20px] mt-3">
-              <p className="text-center font-semibold">
-                {' '}
-                {currency.format(total, { code: 'USD' })}
-              </p>
+            <div className="w-full flex justify-end items-center gap-x-[20px]">
               <button
                 onClick={async () => {
                   if (!infoUser.phone || !infoUser.address || !infoUser.name) {
@@ -319,6 +324,10 @@ const Cart = () => {
               >
                 Purchase
               </button>
+              <p className="text-center font-semibold">
+                {' '}
+                {currency.format(total, { code: 'USD' })}
+              </p>
             </div>
           </div>
         </Modal>
@@ -429,7 +438,7 @@ const Cart = () => {
           </>
         ) : (
           <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-md text-sm font-medium text-red-700">
-            Cart is empty!
+            Cart is empty!a
           </div>
         )}
       </motion.div>

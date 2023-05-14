@@ -7,10 +7,13 @@ import { useCreateMutation } from "../../redux/services/categoryService";
 import { setSuccess } from "../../redux/reducers/globalReducer";
 import ReactQuill from "react-quill";
 
-import { BsArrowLeftShort } from "react-icons/bs";
+import { BsArrowLeftShort, BsLaptop } from "react-icons/bs";
 import ImagesPreview from "../../components/ImagesPreview";
+import laptop from "../../assets/img/laptop.jpg";
 
 const CreateCategory = () => {
+  const [previewAvatar, setPreviewAvatar] = useState("");
+  const [errorAvatar, setErrorAvatar] = useState("");
   const [value, setValue] = useState("");
   const [state, setState] = useState({
     name: "",
@@ -22,7 +25,6 @@ const CreateCategory = () => {
     setState({ ...state, [e.target.name]: e.target.value });
   };
   const [saveCategory, data] = useCreateMutation();
-  //   console.log(data);
   const errors = data?.error?.data?.errors ? data?.error?.data?.errors : [];
 
   const imageHandle = (e) => {
@@ -53,6 +55,18 @@ const CreateCategory = () => {
       navigate("/admin/categories");
     }
   }, [data?.isSuccess]);
+
+  useEffect(() => {
+    return () => {
+      previewAvatar && URL.revokeObjectURL(previewAvatar);
+    };
+  }, [previewAvatar]);
+
+  const handleChooseAvatar = (e) => {
+    const file = e.target.files[0];
+    setPreviewAvatar(URL.createObjectURL(file));
+    setErrorAvatar("");
+  };
 
   return (
     <Wrapper>
@@ -110,47 +124,47 @@ const CreateCategory = () => {
           >
             Image
           </label>
-          <div className="flex items-center justify-center w-full">
-            <label
-              htmlFor="dropzone-file"
-              className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-            >
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <svg
-                  aria-hidden="true"
-                  className="w-10 h-10 mb-3 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                  ></path>
-                </svg>
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Click to upload</span> or drag
-                  and drop
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  SVG, PNG, JPG or GIF (MAX. 800x400px)
-                </p>
-              </div>
-              <input
-                id="dropzone-file"
-                type="file"
-                className="hidden"
-                name="image"
-                onChange={imageHandle}
+          <div className="my-[50px] flex flex-col justify-center items-center">
+            {previewAvatar ? (
+              <img
+                src={previewAvatar}
+                alt=""
+                className="h-[200px] w-[200px] rounded-[50%] object-cover mb-[10px]"
               />
-            </label>
+            ) : (
+              <div>
+                <img
+                  src={laptop}
+                  alt=""
+                  className="h-[200px] w-[200px] rounded-[50%] object-cover mb-[10px]"
+                />
+              </div>
+            )}
+            <input
+              type="file"
+              onChange={handleChooseAvatar}
+              className="mt-[10px]
+                file:bg-gradient-to-b file:from-blue-500 file:to-blue-600
+                file:px-3 file:py-1 file:m-5
+                file:border-none
+                file:rounded-full
+                file:text-white
+                file:cursor-pointer
+                file:shadow-lg file:shadow-blue-600/50
+                
+                bg-gradient-to-br from-gray-600 to-gray-700
+                text-white/80
+                rounded-full
+                cursor-pointer 
+                shadow-xl shadow-gray-700/60
+                "
+            />
+            {errorAvatar && (
+              <div className="h-[50px]">
+                <p className="text-md text-red-500 pl-5">{errorAvatar}</p>
+              </div>
+            )}
           </div>
-        </div>
-        <div className="mb-3">
-          <ImagesPreview url={preview.image} heading="Image" />
         </div>
         <div className="mb-3">
           <input
