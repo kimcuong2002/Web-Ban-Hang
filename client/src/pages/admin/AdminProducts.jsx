@@ -9,6 +9,7 @@ import {
   useDeleteProductMutation,
   useUpdateProductMutation,
 } from "../../redux/services/productService";
+import Swal from 'sweetalert2';
 import { useForm } from "react-hook-form";
 import { useAllCategoriesQuery } from "../../redux/services/categoryService";
 import ScreenHeader from "../../components/ScreenHeader";
@@ -26,8 +27,17 @@ const AdminProducts = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      name: '',
+      price: '',
+      discount: '',
+      stock: '',
+      category: '',
+    }
+  });
 
   useEffect(() => {
     if (!myResponse.isSuccess) {
@@ -46,31 +56,25 @@ const AdminProducts = () => {
   }, [myResponse?.isSuccess]);
 
   const categories = useAllCategoriesQuery();
-  const [state, setState] = useState({
-    name: "",
-    price: 0,
-    discount: 0,
-    stock: 0,
-    category: "",
-  });
 
   const [sizes] = useState([
-    { name: "xsm" },
-    { name: "sm" },
-    { name: "md" },
-    { name: "lg" },
-    { name: "xl" },
-    { name: "1 year" },
-    { name: "2 years" },
-    { name: "3 years" },
-    { name: "4 years" },
-    { name: "5 years" },
+    "xsm",
+    "sm",
+    "md",
+    "lg",
+    "xl",
+    "1 year",
+    "2 years",
+    "3 years",
+    "4 years",
+    "5 years",
   ]);
   const [colorList, setColorList] = useState([])
   const [sizeList, setSizeList] = useState([]);
   const [description, setDescription] = useState("");
   const [listImagePreview, setListImagePreview] = useState([])
   const [files, setFiles] = useState(null)
+  const [idProduct, setIdProduct] = useState('');
 
   const [errorVali, setErrorVali] = useState({
     size: '',
@@ -89,12 +93,12 @@ const AdminProducts = () => {
     setColorList([...filtered]);
     setErrorVali({...errorVali, color: "Colors is required"})
   };
-  const chooseSize = (sizeObject) => {
+  const chooseSize = (size) => {
     let result = sizeList;
-    if (result.includes(sizeObject)) {
-      result = result.filter((size) => size.name !== sizeObject.name)
+    if (result.includes(size)) {
+      result = result.filter((s) => s !== size)
     } else {
-      result = [...result, sizeObject]
+      result = [...result, size]
     }
     setSizeList([...result]);
     setErrorVali({...errorVali, size: ""})
@@ -108,15 +112,28 @@ const AdminProducts = () => {
   const [openModal, setOpenModal] = useState(false);
 
   const deleteProduct = (id) => {
-    if (window.confirm("Are you really want to delete this product?")) {
-      delProduct(id);
-    }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to delete this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire('Deleted!', 'Your file has been deleted.', 'success');
+        delProduct(id);
+      }
+    });
   };
+
   useEffect(() => {
     if (response.isSuccess) {
       dispatch(setSuccess(response?.data?.message));
     }
   }, [response?.data?.message]);
+
   useEffect(() => {
     if (success) {
       toast.success(success);
@@ -126,15 +143,65 @@ const AdminProducts = () => {
     };
   }, []);
 
+  const handleEdit = (product) => {
+    setOpenModal(true)
+    setIdProduct(product.id)
+    setValue('name', product.name)
+    setValue('price', product.price)
+    setValue('stock', product.stock)
+    setValue('discount', product.discount)
+    setValue('category', product.category)
+    setColorList(product.colors)
+    setSizeList(product.sizes)
+    setDescription(product.description)
+    let imgs = [];
+    for(const image of product.images) {
+      imgs = [...imgs, `../${
+        import.meta.env.VITE_PATH_IMAGE
+      }/products/${image}`]
+    }
+    setListImagePreview(imgs)
+  }
+
   const handleSubmitProduct = (data) => {
     const result = validate(sizeList, colorList, description, listImagePreview)
     setErrorVali({...errorVali, ...result})
     if(result.size || result.color || result.desc || result.img) {
       return;
     }
-    console.log('data', data)
-    
+
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(data)) {
+      formData.append(key, value)
+    }
+
+    if(files) {
+      Object.entries(files).forEach((item) => {
+        formData.append('images', item[1])
+      })
+    }
+
+    for (const color of colorList) {
+      formData.append('colors', color)
+    }
+
+    for (const size of sizeList) {
+      formData.append('sizes', size)
+    }
+
+    formData.append('description', description)
+    updateProduct({
+      id: idProduct,
+      body: formData
+    })
   }
+
+  useEffect(() => {
+    if(myResponse?.isSuccess) {
+      setOpenModal(false)
+    }
+  }, [myResponse?.isSuccess])
+
   return (
     <div className="relative" >
       <Wrapper>
@@ -226,7 +293,7 @@ const AdminProducts = () => {
                       </td>
                       <td className="p-3 capitalize text-sm font-normal text-gray-400">
                         <a
-                          onClick={() => { setOpenModal(true) }}
+                          onClick={() => handleEdit(product)}
                           className="btn btn-warning"
                           data-modal-target="popup-modal"
                           data-modal-toggle="popup-modal"

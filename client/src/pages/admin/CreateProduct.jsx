@@ -97,15 +97,30 @@ const CreateProduct = ({ onSubmit }) => {
   } = useForm();
 
   const handleSubmitProduct = (data) => {
-    
     const result = validate(sizeList, colorList, description, listImagePreview)
-    console.log(result)
     setErrorVali({...errorVali, ...result})
     if(result.size || result.color || result.desc || result.img) {
       return;
     }
-    console.log('data', data)
-    
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(data)) {
+      formData.append(key, value)
+    }
+
+    Object.entries(files).forEach((item) => {
+      formData.append('images', item[1])
+    })
+
+    for (const color of colorList) {
+      formData.append('colors', color)
+    }
+
+    for (const size of sizeList) {
+      formData.append('sizes', size.name)
+    }
+
+    formData.append('description', description)
+    createNewProduct(formData)
   };
 
   return (

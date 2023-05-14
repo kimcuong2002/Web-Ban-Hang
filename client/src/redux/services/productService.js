@@ -28,9 +28,9 @@ const productService = createApi({
       updateProduct: builder.mutation({
         query: (data) => {
           return {
-            url: "/product",
-            method: "PUT",
-            body: data,
+            url: `/products/${data.id}`,
+            method: "PATCH",
+            body: data.body,
           };
         },
         invalidatesTags: ["products"],

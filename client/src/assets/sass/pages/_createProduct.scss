@@ -5,3 +5,7 @@
 .size-active {
     @apply border border-white ml-2 px-3 py-1.5 mt-2 uppercase cursor-pointer rounded text-white text-sm
 }
+
+.size-active-edit {
+    @apply border border-red-500 ml-2 px-3 py-1.5 mt-2 uppercase cursor-pointer rounded text-red-500 text-sm
+}

@@ -29,7 +29,7 @@ function ModalEditProduct ({
     }) {  
 
     return(
-        <div className="relative bg-slate-300 ml-64 px-2 w-[70%] h-[90%] overflow-auto modal_container z-20">
+        <div className="relative bg-slate-300 ml-64 px-2 w-[70%] h-[90%] overflow-auto modal_container z-[60]">
             <div className="p-3 ">
                 <div className="flex justify-between text-slate-800 font-bold text-[30px] uppercase">
                 <p>EDIT PRODUCTS</p>
@@ -233,12 +233,12 @@ function ModalEditProduct ({
                                     <div className="flex flex-wrap px-16 mb-3">
                                         {sizes.map((size) => (
                                             <div
-                                            key={size.name}
-                                            className={sizeList.includes(size) ? 'size-active' : 'size'}
+                                            key={size}
+                                            className={sizeList.includes(size)? 'size-active-edit' : 'size'}
                                             name="size"
                                             onClick={() => chooseSize(size)}
                                             >
-                                            {size.name}
+                                            {size}
                                             </div>
                                         ))}
                                     </div>

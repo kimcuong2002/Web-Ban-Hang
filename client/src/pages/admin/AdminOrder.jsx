@@ -2,11 +2,14 @@ import currency from "currency-formatter";
 import { discount } from "../../utils/discount";
 import { useSelector, useDispatch } from "react-redux";
 import Wrapper from "./Wrapper";
+import { useNavigate, useParams } from "react-router-dom";
 import Spinner from "../../components/Spinner";
 import Pagination from "../../components/Pagination";
 import Modal from "../../components/Modal";
 import { useState } from "react";
+import Swal from 'sweetalert2';
 import { AiOutlineCloseCircle } from "react-icons/ai";
+import { clearMessage, setSuccess } from "../../redux/reducers/globalReducer";
 import {
   useGetOrdersQuery,
   useDeleteOrderMutation,
@@ -17,42 +20,57 @@ import { setInfoUser } from "../../redux/reducers/orderReducer";
 import useToastify from "../../hooks/useToatify";
 
 const AdminOrder = () => {
+  let { page } = useParams();
+  if (!page) {
+    page = 1;
+  }
   const { statusOrder, infoUser } = useSelector((state) => state.orderReducer);
   const [openModal, setOpenModal] = useState(false);
-  const [page, setPage] = useState(1);
   const [orderBody, setOrderBody] = useState({});
   const { success } = useSelector((state) => state.globalReducer);
   const dispatch = useDispatch();
   const { cart, total } = useSelector((state) => state.cartReducer);
   const orders = useGetOrdersQuery(page);
   const [deleteOrders, response] = useDeleteOrderMutation();
-  const [updateOrder] = useUpdateOrderMutation();
-  const [num, setNum] = useState(0);
+  const [updateOrder, res] = useUpdateOrderMutation();
   const toast = useToastify();
+  const navigate = useNavigate();
 
-  console.log("gggggggg", orders);
   const deleteOrder = (id) => {
-    if (window.confirm("Do you want to delete the order?")) {
-      deleteOrders(id);
-      setNum(Math.random());
-    }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to delete this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire('Deleted!', 'Your file has been deleted.', 'success');
+        deleteOrders(id);
+      }
+    });
   };
 
   useEffect(() => {
-    updateOrder({
-      if(id) {
-        body: ({
-          fullname,
-          address,
-          phone,
-        });
-      },
-    });
-  }, []);
+    if (!res.isSuccess) {
+      res?.error?.data?.errors.map((err) => {
+        toast.handleOpenToastify('error', err.msg, 1000)
+      });
+    }
+  }, [res?.error?.data?.errors]);
+  
+  useEffect(() => {
+    if(res?.isSuccess) {
+      navigate('/admin/orders')
+      toast.handleOpenToastify('success', 'Update successfully', 1000)
+      setOpenModal(false)
+    }
+  }, [res?.isSuccess])
 
   return (
     <div>
-      <div className="none">{num}</div>
       <div className="2xl:w-[1400px] overflow-x-scroll">
         {openModal && (
           <Modal
@@ -188,37 +206,14 @@ const AdminOrder = () => {
               <div className="w-[100%] flex justify-end gap-x-[20px]">
                 <button
                   onClick={() => {
-                    console.log("aaaaaaaaaaaa", infoUser);
-                    if (orders.isSuccess) {
-                      toast.handleOpenToastify(
-                        "success",
-                        "Update successfully!",
-                        1000
-                      );
-                      setOpenModal(false);
-                    } else {
-                      toast.handleOpenToastify(
-                        "failed",
-                        "Update failed!",
-                        1000
-                      );
-                    }
-                    if (
-                      !infoUser.phone ||
-                      !infoUser.address ||
-                      !infoUser.name
-                    ) {
-                      return;
-                    } else {
-                      updateOrder({
-                        id: orderBody.id,
-                        body: {
-                          fullname: infoUser.name,
-                          address: infoUser.address,
-                          phone: infoUser.phone,
-                        },
-                      });
-                    }
+                    updateOrder({
+                      id: orderBody.id,
+                      body: {
+                        fullname: infoUser.name,
+                        address: infoUser.address,
+                        phone: infoUser.phone,
+                      },
+                    });
                   }}
                   className="border-2 py-[5px] px-[10px] rounded-[7px] border-cyan-500 text-cyan-500 hover:bg-cyan-500 border-white hover:text-black mr-[40px]"
                 >
@@ -315,7 +310,7 @@ const AdminOrder = () => {
               page={parseInt(page)}
               perPage={orders.data?.perPage}
               count={orders.data?.count}
-              path="admin/categories"
+              path="admin/orders"
             />
           </>
         ) : (

@@ -22,15 +22,17 @@ const userOrdersService = createApi({
             body,
           };
         },
+        invalidatesTags: ["user-orders"],
       }),
       updateOrder: builder.mutation({
         query: (data) => {
           return {
             url: `/orders/${data.id}`,
-            method: "PUT",
+            method: "PATCH",
             body: data.body,
           };
         },
+        invalidatesTags: ["user-orders"],
       }),
       getOrders: builder.query({
         query: (page) => {
@@ -39,7 +41,7 @@ const userOrdersService = createApi({
             method: "GET",
           };
         },
-        providesTags: ["orders"],
+        invalidatesTags: ["user-orders"],
       }),
       getOrderByIdUser: builder.query({
         query: (data) => {
@@ -48,6 +50,7 @@ const userOrdersService = createApi({
             method: "GET",
           };
         },
+        invalidatesTags: ["user-orders"],
       }),
       deleteOrder: builder.mutation({
         query: (id) => {
@@ -56,6 +59,7 @@ const userOrdersService = createApi({
             method: "DELETE",
           };
         },
+        invalidatesTags: ["user-orders"],
       }),
       details: builder.query({
         query: (id) => {
@@ -64,7 +68,7 @@ const userOrdersService = createApi({
             method: "GET",
           };
         },
-        providesTags: ["orders"],
+        invalidatesTags: ["user-orders"],
       }),
       receivedOrder: builder.mutation({
         query: (id) => {
@@ -73,7 +77,7 @@ const userOrdersService = createApi({
             method: "PUT",
           };
         },
-        invalidatesTags: ["orders"],
+        invalidatesTags: ["user-orders"],
       }),
       postReview: builder.mutation({
         query: (body) => {
@@ -83,7 +87,7 @@ const userOrdersService = createApi({
             body,
           };
         },
-        invalidatesTags: ["orders"],
+        invalidatesTags: ["user-orders"],
       }),
     };
   },

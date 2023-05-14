@@ -23,7 +23,7 @@ router
 router
   .route("/:id")
   .get(Authorization.authorized, orderController.orderDetail)
-  .put(Authorization.authorized, orderController.updateOrder)
+  .patch(Authorization.authorized, orderController.updateOrder)
   .delete(Authorization.authorized, orderController.deleteOrder);
 
 router

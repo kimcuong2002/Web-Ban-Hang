@@ -126,6 +126,14 @@ function Routers() {
             }
           />
           <Route
+            path="orders/:page"
+            element={
+              <Private>
+                <AdminOrder />
+              </Private>
+            }
+          />
+          <Route
             path="customers"
             element={
               <Private>

@@ -42,7 +42,6 @@ const DetailsCard = ({ product }) => {
   const [createCart, res] = useCreateCartMutation();
   const [updateCart, response] = useUpdateCartMutation();
 
-  console.log(res);
   const discountPrice = discount(product.price, product.discount);
   let desc = h2p(product.description);
   desc = htmlParser(desc);
@@ -56,7 +55,6 @@ const DetailsCard = ({ product }) => {
       ['updatedAt']: updatedAt,
       ...newProduct
     } = product;
-    console.log(newProduct)
     newProduct['size'] = sizeState;
     newProduct['color'] = colorState;
     newProduct['quantity'] = quantity;
