@@ -10,18 +10,6 @@ import { discount } from '../utils/discount';
 import useToastify from '../hooks/useToatify';
 import Quantity from '../components/Quantity';
 import { setCart, setTotal } from '../redux/reducers/cartReducer';
-import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import currency from 'currency-formatter';
-import { BsTrash } from 'react-icons/bs';
-import { ImCross } from 'react-icons/im';
-import { motion } from 'framer-motion';
-import Swal from 'sweetalert2';
-import { discount } from '../utils/discount';
-import useToastify from '../hooks/useToatify';
-import Quantity from '../components/Quantity';
-import { setCart, setTotal } from '../redux/reducers/cartReducer';
 import {
   incQuantity,
   decQuantity,
