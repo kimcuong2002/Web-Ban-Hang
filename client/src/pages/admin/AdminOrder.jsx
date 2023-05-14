@@ -1,23 +1,23 @@
-import currency from "currency-formatter";
-import { discount } from "../../utils/discount";
-import { useSelector, useDispatch } from "react-redux";
-import Wrapper from "./Wrapper";
-import { useNavigate, useParams } from "react-router-dom";
-import Spinner from "../../components/Spinner";
-import Pagination from "../../components/Pagination";
-import Modal from "../../components/Modal";
-import { useState } from "react";
+import currency from 'currency-formatter';
+import { discount } from '../../utils/discount';
+import { useSelector, useDispatch } from 'react-redux';
+import Wrapper from './Wrapper';
+import { useNavigate, useParams } from 'react-router-dom';
+import Spinner from '../../components/Spinner';
+import Pagination from '../../components/Pagination';
+import Modal from '../../components/Modal';
+import { useState } from 'react';
 import Swal from 'sweetalert2';
-import { AiOutlineCloseCircle } from "react-icons/ai";
-import { clearMessage, setSuccess } from "../../redux/reducers/globalReducer";
+import { AiOutlineCloseCircle } from 'react-icons/ai';
+import { clearMessage, setSuccess } from '../../redux/reducers/globalReducer';
 import {
   useGetOrdersQuery,
   useDeleteOrderMutation,
   useUpdateOrderMutation,
-} from "../../redux/services/userOrdersService";
-import { useEffect } from "react";
-import { setInfoUser } from "../../redux/reducers/orderReducer";
-import useToastify from "../../hooks/useToatify";
+} from '../../redux/services/userOrdersService';
+import { useEffect } from 'react';
+import { setInfoUser } from '../../redux/reducers/orderReducer';
+import useToastify from '../../hooks/useToatify';
 
 const AdminOrder = () => {
   let { page } = useParams();
@@ -29,6 +29,7 @@ const AdminOrder = () => {
   const [orderBody, setOrderBody] = useState({});
   const { success } = useSelector((state) => state.globalReducer);
   const dispatch = useDispatch();
+  const [status, setStatus] = useState('WAITTING');
   const { cart, total } = useSelector((state) => state.cartReducer);
   const orders = useGetOrdersQuery(page);
   const [deleteOrders, response] = useDeleteOrderMutation();
@@ -53,21 +54,23 @@ const AdminOrder = () => {
     });
   };
 
+  console.log(orderBody)
+
   useEffect(() => {
     if (!res.isSuccess) {
       res?.error?.data?.errors.map((err) => {
-        toast.handleOpenToastify('error', err.msg, 1000)
+        toast.handleOpenToastify('error', err.msg, 1000);
       });
     }
   }, [res?.error?.data?.errors]);
-  
+
   useEffect(() => {
-    if(res?.isSuccess) {
-      navigate('/admin/orders')
-      toast.handleOpenToastify('success', 'Update successfully', 1000)
-      setOpenModal(false)
+    if (res?.isSuccess) {
+      navigate('/admin/orders');
+      toast.handleOpenToastify('success', 'Update successfully', 1000);
+      setOpenModal(false);
     }
-  }, [res?.isSuccess])
+  }, [res?.isSuccess]);
 
   return (
     <div>
@@ -94,7 +97,7 @@ const AdminOrder = () => {
                   htmlFor=""
                   className="text-[17px] mr-[10px] w-[25%] font-[16px] outline-0"
                 >
-                  {" "}
+                  {' '}
                   Name:
                 </p>
                 <input
@@ -108,7 +111,7 @@ const AdminOrder = () => {
               </div>
               <div className="w-[70%] flex mb-[20px]">
                 <p htmlFor="" className="text-[17px] mr-[10px] w-[25%]">
-                  {" "}
+                  {' '}
                   Adress:
                 </p>
                 <input
@@ -127,7 +130,7 @@ const AdminOrder = () => {
               </div>
               <div className="w-[70%] flex mb-[20px]">
                 <p htmlFor="" className="text-[17px] mr-[10px] w-[25%]">
-                  {" "}
+                  {' '}
                   Phone:
                 </p>
                 <input
@@ -140,6 +143,21 @@ const AdminOrder = () => {
                     )
                   }
                 />
+              </div>
+              <div className="w-[70%] flex mb-[20px]">
+                <p htmlFor="" className="text-[17px] mr-[10px] w-[25%]">
+                  {' '}
+                  Status:
+                </p>
+                <select
+                  id="countries"
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="w-[75%] border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5"
+                >
+                  <option selected={status === 'WAITTING'} value="WAITTING">WAITTING</option>
+                  <option selected={status === 'DELIVERED'} value="DELIVERED">DELIVERED</option>
+                  <option selected={status === 'FINISH'} value="FINISH">FINISH</option>
+                </select>
               </div>
               <p className="font-[17px] mt-[20px] font-bold">
                 Product Informations
@@ -175,12 +193,12 @@ const AdminOrder = () => {
                           </div>
                           <p className="w-[30%] text-center">{item.name}</p>
                           <div className="w-[10%] h-[20px]">
-                            {" "}
+                            {' '}
                             <span
                               className="block w-[25px] h-[25px] rounded-full"
                               style={{
                                 backgroundColor: item.color,
-                                margin: "0 auto",
+                                margin: '0 auto',
                               }}
                             ></span>
                           </div>
@@ -190,7 +208,7 @@ const AdminOrder = () => {
                             {currency.format(
                               discount(item.price, item.discount),
                               {
-                                code: "USD",
+                                code: 'USD',
                               }
                             )}
                           </p>
@@ -212,6 +230,7 @@ const AdminOrder = () => {
                         fullname: infoUser.name,
                         address: infoUser.address,
                         phone: infoUser.phone,
+                        status: status
                       },
                     });
                   }}
@@ -260,16 +279,16 @@ const AdminOrder = () => {
                     orders.data?.orders.map((item, index) => (
                       <tr key={index} className="odd:bg-gray-800">
                         <td className="p-3 capitalize text-sm font-normal text-gray-400 text-center">
-                          {item?.id ? item?.id : "-"}
+                          {item?.id ? item?.id : '-'}
                         </td>
                         <td className="p-3 capitalize text-sm font-normal text-gray-400 text-center">
-                          {item?.fullname ? item?.fullname : "-"}
+                          {item?.fullname ? item?.fullname : '-'}
                         </td>
                         <td className="p-3 capitalize text-sm font-normal text-gray-400 text-center">
-                          {item?.phone ? item?.phone : "-"}
+                          {item?.phone ? item?.phone : '-'}
                         </td>
                         <td className="p-3 capitalize text-sm font-normal text-gray-400 text-center">
-                          {item?.address ? item?.address : "-"}
+                          {item?.address ? item?.address : '-'}
                         </td>
                         <td className="p-3 capitalize text-sm font-normal text-gray-400 text-center">
                           {item?.status}
@@ -279,6 +298,7 @@ const AdminOrder = () => {
                             className="btn btn-warning"
                             onClick={() => {
                               setOrderBody({ ...item });
+                              setStatus(item.status)
                               dispatch(
                                 setInfoUser({
                                   ...infoUser,
