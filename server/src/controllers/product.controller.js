@@ -5,7 +5,7 @@ const { PATH_UPLOAD_FILE } = require("../../config/envConfig");
  */
 const { validationResult } = require("express-validator");
 const fs = require("fs");
-const { Product } = require("../models");
+const { Order, Product, Review } = require("../models");
 
 const create = async (req, res) => {
   const errors = validationResult(req);
@@ -134,5 +134,5 @@ module.exports = {
   paginate,
   findById,
   update,
-  deleteProduct,
+  deleteProduct
 };

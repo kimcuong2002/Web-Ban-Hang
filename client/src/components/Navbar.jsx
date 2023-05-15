@@ -47,7 +47,7 @@ const Navbar = () => {
             className={
               click
                 ? "navbar-nav flex flex-col absolute left-0 top-16 pt-3 bg-[#212121] z-10 w-screen h-screen gap-3 text-center transition-all duration-500 lg:transition-none lg:relative lg:flex-row lg:content-center lg:items-center lg:gap-5 lg:w-full lg:h-full lg:top-0 lg:left-0 lg:pt-0"
-                : "navbar-nav flex flex-col absolute left-[-100%] top-16 pt-3 bg-[#212121] z-10 w-screen h-screen gap-3 text-center transition-all duration-500 lg:transition-none lg:relative lg:flex-row lg:content-center lg:items-center lg:gap-5 lg:w-full lg:h-full lg:top-0 lg:left-0 lg:pt-0 z-0"
+                : "navbar-nav flex flex-col absolute left-[-150%] top-16 pt-3 bg-[#212121] z-10 w-screen h-screen gap-3 text-center transition-all duration-500 lg:transition-none lg:relative lg:flex-row lg:content-center lg:items-center lg:gap-5 lg:w-full lg:h-full lg:top-0 lg:left-0 lg:pt-0 z-0"
             }
           >
             <Link to="" onClick={closeMobileMenu}>
