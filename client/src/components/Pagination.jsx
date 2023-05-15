@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
-const Pagination = ({ page, count, perPage, path, theme }) => {
+const Pagination = ({ page, count, perPage, path, theme, click }) => {
+
   const totalLinks = Math.ceil(count / perPage);
   let startLoop = page;
   let diff = totalLinks - page;
@@ -16,15 +17,22 @@ const Pagination = ({ page, count, perPage, path, theme }) => {
     const allLinks = [];
     for (let i = startLoop; i <= endLoop; i++) {
       allLinks.push(
-        <li key={i} className="pagination-li mr-1">
-          <Link
+        <li key={i} className={`pagination-li mr-1 px-2 py-1 rounded ${
+          theme === "light" ? "pagination-link-light" : "pagination-link"
+        }  ${page === i && "bg-indigo-500 text-white"}`} onClick={() => {
+          if(!path) {
+            click(i);
+          }
+        }}>
+          {path && !click && <Link
             className={`px-2 py-1 rounded ${
               theme === "light" ? "pagination-link-light" : "pagination-link"
             }  ${page === i && "bg-indigo-500 text-white"}`}
             to={`/${path}/${i}`}
           >
             {i}
-          </Link>
+          </Link>}
+          {i}
         </li>,
       );
     }

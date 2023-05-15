@@ -4,7 +4,7 @@ function useToastify() {
   const handleOpenToastify = (status, content, duration) => {
     if (status === "success") {
       return toast.success(content, {
-        position: "top-right",
+        position: "top-center",
         autoClose: duration,
         hideProgressBar: true,
         closeOnClick: true,
@@ -16,7 +16,7 @@ function useToastify() {
     }
     if (status === "error") {
       return toast.error(content, {
-        position: "top-right",
+        position: "top-center",
         autoClose: duration,
         hideProgressBar: true,
         closeOnClick: true,

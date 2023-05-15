@@ -32,34 +32,27 @@ const createRating = async (req, res) => {
   };
 
   const getReviews = async (req, res) => {
-    const { page, productId } = req.query;
-    const limit = 10;
-    const skip = (page - 1) * limit;
+    const { page, productId, limit } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
   
     try {
       const count = await Review.find({product: productId}).countDocuments();
+
       Review.find({product: productId}).populate([
-        // here array is for our memory. 
-        // because may need to populate multiple things
         {
-            path: 'user',
-            select: ['name', 'avatar'],
-            model:'User',
-            options: {
-                sort:{ },
-                skip: skip,
-                limit : limit
-            },
-            match:{
-            }
+          path: 'user',
+          select: ['username', 'avatar'],
+          model: 'User'
         }
-    ]).exec((err, story) => {
-        if(err){
-         return err;
-        } else {
-          return res.status(200).json({reviews: story, page: page, count: count})
+      ]).skip(skip).limit(limit).exec((err, story) => {
+        if(err) {
+          return res.json(err)
         }
+        return res.status(200).json({
+          reviews: story, limit: limit, count: count, page: page
+        })
       })
+
     } catch (error) {
       console.log(error.message);
       return res.status(500).json("Server internal error!");

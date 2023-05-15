@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import currency from 'currency-formatter';
 import { motion } from 'framer-motion';
 import h2p from 'html2plaintext';
@@ -9,12 +9,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import Quantity from './Quantity';
 import { addCart, setTotal } from '../redux/reducers/cartReducer';
 import { discount } from '../utils/discount';
-import { EffectCoverflow, Pagination } from 'swiper';
+import { EffectCoverflow } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import Pagination from '../components/Pagination';
 import {
   useCreateCartMutation,
   useUpdateCartMutation,
 } from '../redux/services/cartService';
+import {useGetReviewsQuery, useCreateReviewMutation, usePrefetch} from '../redux/services/reviewServices';
+import Comment from './Comment';
+import StarIcon from './StarIcon';
+import { useNavigate } from 'react-router-dom';
 
 const DetailsCard = ({ product }) => {
   const [sizeState, setSizeState] = useState(
@@ -28,6 +33,22 @@ const DetailsCard = ({ product }) => {
   );
   const [quantity, setQuantity] = useState(1);
   const [idCart, setIdCart] = useState('');
+  const [page, setPage] = useState(1);
+  const [sumStar, setSumStar] = useState(0);
+  const [comment, setComment] = useState({
+    rating: 0,
+    content: '',
+  })
+
+  
+  const limit = useMemo(() => {
+    return 5;
+  }, [])
+  
+  const [createReview, responseReview] = useCreateReviewMutation();
+  const reviews = useGetReviewsQuery({page: page, productId: product.id, limit: limit})
+  const prefetchReviews = usePrefetch(`/reviews?page=${page}&&limit=${limit}&&productId=${product?.id}`);
+  
   const inc = () => {
     setQuantity(quantity + 1);
   };
@@ -37,17 +58,18 @@ const DetailsCard = ({ product }) => {
     }
   };
 
-  const { user } = useSelector((state) => state.authReducer);
+  const { user, userToken } = useSelector((state) => state.authReducer);
   const { cart } = useSelector((state) => state.cartReducer);
   const [createCart, res] = useCreateCartMutation();
   const [updateCart, response] = useUpdateCartMutation();
+
+  const navigate = useNavigate();
 
   const discountPrice = discount(product.price, product.discount);
   let desc = h2p(product.description);
   desc = htmlParser(desc);
   const dispatch = useDispatch();
   const addToCart = () => {
-
     const {
       ['colors']: colors,
       ['sizes']: sizes,
@@ -67,6 +89,7 @@ const DetailsCard = ({ product }) => {
         item.size === newProduct.size &&
         item.color === newProduct.color
     );
+
     if (cartItems.lenght === 0) {
       dispatch(addCart(newProduct));
       cartItems.push(newProduct);
@@ -101,6 +124,42 @@ const DetailsCard = ({ product }) => {
       }
     }
   };
+
+  const handleComment = () => {
+    if (userToken) {
+      if(comment.rating === 0 && !comment.content) {
+        return;
+      }
+      createReview({
+        rating: comment.rating,
+        message: comment.content,
+        product: product?.id,
+        user: user?.id,
+      })
+    } else {
+      navigate('/login');
+    }
+  };
+
+  const handleChooseSumStar = (item) => {
+    if(item === sumStar) {
+      setComment({...comment, rating: 0})
+      return setSumStar(0)
+    }
+    setComment({...comment, rating: item})
+    setSumStar(item) 
+  }
+
+  useEffect(() => {
+    if(responseReview?.isSuccess) {
+      prefetchReviews();
+      handleChooseSumStar(0)
+      setComment({rating: 0, content: ''})
+      toast.success('You review product successfully!');
+    }
+  }, [responseReview?.isSuccess])
+
+
 
   useEffect(() => {
     if (cart.length !== 0) {
@@ -248,6 +307,20 @@ const DetailsCard = ({ product }) => {
         </h3>
         <div className="mt-4 leading-[27px] description">{desc}</div>
       </div>
+      <div className="w-full order-3 px-5 items-center">
+        <div className=''>
+          <p>Rating</p>
+          <div className=" flex justify-start" >
+            {[1,2,3,4,5].map((item) => (
+              <StarIcon key={item} click={() => handleChooseSumStar(item)} size="1.5rem" color={item <= sumStar ? 'orange' : 'gray'}/>
+            )) }
+          </div>
+          <p className='italic font-sans flex justify-start'>Rating: {sumStar}/5</p>
+        </div>
+        <Comment setComment={setComment} comment={comment} onComment={handleComment} comments={reviews.data?.reviews} colorIcon={'orange'}/>
+        <Pagination page={parseInt(page)} perPage={limit} count={reviews.data?.count} click={(p) => setPage(p)} />
+      </div>
+      
     </motion.div>
   );
 };
