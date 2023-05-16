@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Quantity from './Quantity';
 import { addCart, setTotal } from '../redux/reducers/cartReducer';
 import { discount } from '../utils/discount';
-import { EffectCoverflow } from 'swiper';
+import { Navigation } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import Pagination from '../components/Pagination';
 import {
@@ -43,6 +43,7 @@ const DetailsCard = ({ product }) => {
     rating: 0,
     content: '',
   });
+  const [errorComment, setErrorComment] = useState('');
 
   const limit = useMemo(() => {
     return 5;
@@ -132,8 +133,8 @@ const DetailsCard = ({ product }) => {
 
   const handleComment = () => {
     if (userToken) {
-      if (comment.rating === 0 && !comment.content) {
-        return;
+      if (comment.rating === 0 || !comment.content) {
+        return setErrorComment('Vui lòng chọn sao và nội dung bình luận')
       }
       createReview({
         rating: comment.rating,
@@ -160,6 +161,7 @@ const DetailsCard = ({ product }) => {
       reviews.refetch();
       handleChooseSumStar(0);
       setComment({ rating: 0, content: '' });
+      setErrorComment('')
       setPage(1);
       toast.success('You review product successfully!');
     }
@@ -190,30 +192,19 @@ const DetailsCard = ({ product }) => {
         {product.images.length > 0 && (
           <>
             <div className="flex flex-wrap -mx-1">
-              <div className="sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[400px] lg:h-[400px] object-cover mx-auto">
+              <div className="sm:w-[200px] sm:h-[200px] md:w-[300px] md:h-[300px] lg:w-[300px] lg:h-[300px] object-cover mx-auto">
                 <img
                   src={`../${
                     import.meta.env.VITE_PATH_IMAGE
                   }/products/${image}`}
                   alt="image"
-                  className="w-full h-auto object-cover"
+                  className="w-full object-cover"
                 />
               </div>
 
               <Swiper
-                effect={'coverflow'}
-                grabCursor={true}
-                centeredSlides={true}
-                slidesPerView={'auto'}
-                coverflowEffect={{
-                  rotate: 50,
-                  stretch: 0,
-                  depth: 100,
-                  modifier: 1,
-                  slideShadows: true,
-                }}
-                pagination={true}
-                modules={[EffectCoverflow, Pagination]}
+                navigation={true}
+                modules={[Navigation]}
                 className="mySwiper"
               >
                 {product.images.map((image, index) => (
@@ -336,6 +327,8 @@ const DetailsCard = ({ product }) => {
               setComment={setComment}
               comment={comment}
               onComment={handleComment}
+              setErrorComment={setErrorComment}
+              errorComment={errorComment}
               comments={reviews.data?.reviews}
               colorIcon={'orange'}
             />

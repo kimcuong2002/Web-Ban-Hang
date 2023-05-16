@@ -41,7 +41,6 @@ const userOrdersService = createApi({
             method: "GET",
           };
         },
-        invalidatesTags: ["user-orders"],
       }),
       getOrderByIdUser: builder.query({
         query: (data) => {
@@ -50,7 +49,6 @@ const userOrdersService = createApi({
             method: "GET",
           };
         },
-        invalidatesTags: ["user-orders"],
       }),
       deleteOrder: builder.mutation({
         query: (id) => {

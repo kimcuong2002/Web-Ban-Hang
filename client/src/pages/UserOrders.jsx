@@ -50,25 +50,36 @@ const UserOrders = () => {
   };
 
   useEffect(() => {
-    if (resUpdate?.error || resDelete?.error) {
-      toast.handleOpenToastify(
-        'error',
-        resUpdate?.isSuccess ? 'Update failed!' : 'Delete failed!',
-        1000
-      );
+    if (resUpdate?.error) {
+      toast.handleOpenToastify('error', 'Update failed!', 1000);
     }
-  }, [resUpdate?.error, resDelete?.error]);
+  }, [resUpdate?.error]);
 
   useEffect(() => {
-    if (resUpdate?.isSuccess || resDelete?.isSuccess) {
-      orders.refetch();
-      toast.handleOpenToastify(
-        'success',
-        resUpdate?.isSuccess ? 'Update successfully!' : 'Delete successfully!',
-        1000
-      );
+    if (resDelete?.error) {
+      toast.handleOpenToastify('error', 'Delete failed!', 1000);
     }
-  }, [resUpdate?.isSuccess, resDelete?.isSuccess]);
+  }, [resDelete?.error]);
+
+  useEffect(() => {
+    if (resUpdate?.isSuccess) {
+      setOpenModal(false)
+      setInfoUser({
+        name: '',
+        address: '',
+        phone: ''
+      })
+      orders.refetch();
+      toast.handleOpenToastify('success', 'Update successfully!', 1000);
+    }
+  }, [resUpdate?.isSuccess]);
+
+  useEffect(() => {
+    if (resDelete?.isSuccess) {
+      orders.refetch();
+      toast.handleOpenToastify('success', 'Delete successfully!', 1000);
+    }
+  }, [resDelete?.isSuccess]);
 
   return (
     <div className="flex mx-auto w-[90%] mb-10 mt-10">
@@ -85,12 +96,10 @@ const UserOrders = () => {
                   <p>Cart</p>
                   <AiOutlineCloseCircle
                     onClick={() => setOpenModal(false)}
-                    className="rounded-[100%] border-cyan-500 text-cyan-500 hover:bg-red-900 border-white hover:text-black cursor-pointer"
+                    className="rounded-[100%] text-cyan-500 hover:bg-red-900 border-white hover:text-black cursor-pointer"
                   />
                 </div>
-                <p className="font-[17px] mt-[20px] font-bold ">
-                  Customer Informations
-                </p>
+                <p className="mt-[20px] font-bold ">Customer Informations</p>
                 <hr className="mt-[5px] mb-[10px] h-[1.5px]" />
                 <div className="w-[70%] flex mb-[20px]">
                   <p
@@ -213,20 +222,6 @@ const UserOrders = () => {
                 <div className="w-[100%] flex justify-end gap-x-[20px]">
                   <button
                     onClick={() => {
-                      if (orders.isSuccess === true) {
-                        toast.handleOpenToastify(
-                          'success',
-                          'Update successfully!',
-                          1000
-                        );
-                        setOpenModal(false);
-                      } else {
-                        toast.handleOpenToastify(
-                          'failed',
-                          'Update failed!',
-                          1000
-                        );
-                      }
                       if (
                         !infoUser.phone ||
                         !infoUser.address ||

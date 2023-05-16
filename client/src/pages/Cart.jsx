@@ -37,7 +37,7 @@ const Cart = () => {
   const [deleteCart] = useDeleteCartMutation();
   const [createCart, res] = useCreateCartMutation();
   const [createOrder, resp] = useCreateOrderMutation();
-  const { data } = useGetCartByIdUserQuery(user?.id);
+  const { refetch, data } = useGetCartByIdUserQuery(user?.id);
   const navigate = useNavigate();
   const [doPayment, response] = useSendPaymentMutation();
   const inc = (i) => {
@@ -76,13 +76,14 @@ const Cart = () => {
     }
   };
   useEffect(() => {
+    const cartLocal = JSON.parse(localStorage.getItem('cart'));
+    let arr = data?.cart[0]?.cart ? data?.cart[0]?.cart : [];
+    let total = 0;
     if (user && data) {
-      const cartLocal = JSON.parse(localStorage.getItem('cart'));
-      if (!data.cart.length) {
+      if (arr.length !== 0 && !cartLocal) {
         dispatch(setCart([]));
         dispatch(setTotal(0));
       }
-      let arr = data?.cart[0]?.cart ? data?.cart[0]?.cart : [];
       if (cartLocal) {
         for (const cart of cartLocal) {
           const index = arr.findIndex(
@@ -95,15 +96,32 @@ const Cart = () => {
             arr = [...arr, cart];
           }
         }
+      } 
+      for (let a of arr) {
+        total += discount(a.price * a.quantity, a.discount);
       }
-      let total = 0;
+      dispatch(setCart(arr));
+      dispatch(setTotal(total));
+    } else if(!user && !data && cartLocal) {
+      let arr = [];
+      for (const cart of cartLocal) {
+        const index = arr.findIndex(
+          (item) =>
+            item.name === cart.name &&
+            item.color === cart.color &&
+            item.size === cart.size
+        );
+        if (index === -1) {
+          arr = [...arr, cart];
+        }
+      } 
       for (let a of arr) {
         total += discount(a.price * a.quantity, a.discount);
       }
       dispatch(setCart(arr));
       dispatch(setTotal(total));
     }
-  }, [data]);
+  }, []);
 
   useEffect(() => {
     const id = localStorage.getItem('cartId');
@@ -146,7 +164,7 @@ const Cart = () => {
     }
   }, [response]);
 
-  useEffect(() => {
+  useEffect( () => {
     if (resp?.isSuccess) {
       const id = localStorage.getItem('cartId');
       if (id) {
@@ -157,6 +175,12 @@ const Cart = () => {
           },
         });
       }
+      toast.handleOpenToastify('success', 'Purchase successfully!', 1000);
+      dispatch(setCart([]));
+      localStorage.removeItem('cart');
+      dispatch(setInfoUser({ name: '', address: '', phone: '' }));
+      localStorage.removeItem('cartId');
+      setOpenModal(false);
     }
   }, [resp?.isSuccess]);
 
@@ -294,18 +318,17 @@ const Cart = () => {
             </div>
             <div className="w-full flex justify-end items-center gap-x-[20px]">
               <button
-                onClick={async () => {
+                onClick={() => {
                   if (!infoUser.phone || !infoUser.address || !infoUser.name) {
                     return;
                   } else {
-                    await createOrder({
+                    createOrder({
                       userId: user?.id,
                       fullname: infoUser.name,
                       address: infoUser.address,
                       phone: infoUser.phone,
                       cart: cart,
                     });
-                    pay();
                   }
                 }}
                 className="py-2 px-3 bg-green-700 text-sm font-medium text-white rounded hover:bg-green-600"

@@ -78,15 +78,15 @@ const AdminOrder = () => {
             setOpen={setOpenModal}
             className="2xl:overflow-x-auto w-[1500px]"
           >
-            <div className="modal_container bg-white w-[70%] p-[20px] z-[60]">
+            <div className="modal_container bg-white w-[90%] h-[90%] p-[20px] z-[60]">
               <div className="flex justify-between text-[30px] uppercase">
                 <p>Cart</p>
                 <AiOutlineCloseCircle
                   onClick={() => setOpenModal(false)}
-                  className="rounded-[100%] border-cyan-500 text-cyan-500 hover:bg-red-900 border-white hover:text-black cursor-pointer"
+                  className="rounded-[100%] text-cyan-500 hover:bg-red-900 border-white hover:text-black cursor-pointer"
                 />
               </div>
-              <p className="font-[17px] mt-[20px] font-bold ">
+              <p className="mt-[20px] font-bold ">
                 Customer Informations
               </p>
               <hr className="mt-[5px] mb-[10px] h-[1.5px]" />
@@ -164,9 +164,9 @@ const AdminOrder = () => {
                 </select>
               </div>
               <p className="mt-[20px] font-bold">Product Informations</p>
-              <hr className="my-[30px] h-[1.5px]" />
+              <hr className="my-[10px] h-[1.5px]" />
               <div>
-                <ul className="w-full flex uppercase justify-between text-center font-bold mb-[20px]">
+                <ul className="w-full flex uppercase justify-between text-center font-bold mb-[10px]">
                   <li className="w-[20%]">image</li>
                   <li className="w-[30%]">name</li>
                   <li className="w-[10%]">color</li>
@@ -175,14 +175,14 @@ const AdminOrder = () => {
                   <li className="w-[10%]">price</li>
                   <li className="w-[10%]">total</li>
                 </ul>
-                <hr className="mb-[20px]" />
-                <div className="overflow-y-auto h-[300px]">
+                <hr className="mb-[10px]" />
+                <div className="overflow-y-scroll h-[100px]">
                   {orderBody.cart &&
                     orderBody.cart.map((item, index) => {
                       return (
                         <div
                           key={index}
-                          className="w-full flex uppercase justify-between items-center text-center"
+                          className="w-full mb-[10px] flex uppercase justify-between items-center text-center"
                         >
                           <div className="w-[20%] flex justify-center">
                             <img
@@ -190,7 +190,7 @@ const AdminOrder = () => {
                                 import.meta.env.VITE_PATH_IMAGE
                               }/products/${item.images[0]}`}
                               alt=""
-                              className="w-[150px]"
+                              className="w-[80px]"
                             />
                           </div>
                           <p className="w-[30%] text-center">{item.name}</p>

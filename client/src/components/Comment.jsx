@@ -1,17 +1,28 @@
 import { useMemo } from 'react';
 import StarIcon from './StarIcon';
 
-function Comment({ onComment, comments, setComment, comment }) {
+function Comment({
+  onComment,
+  comments,
+  setComment,
+  comment,
+  setErrorComment,
+  errorComment,
+}) {
   return (
     <div className="">
       <h3 className="text-lg uppercase border-b border-x-gray-500">Comment</h3>
       <hr></hr>
       <textarea
-      value={comment.content}
-      onChange={(e) => setComment({...comment, content: e.target.value})}
+        value={comment.content}
+        onChange={(e) => {
+          setComment({ ...comment, content: e.target.value })
+          setErrorComment('')
+        }}
         className=" placeholder:text-sm my-2 resize-y rounded-md w-full p-3 drop-shadow-lg border border-x-gray-500"
         placeholder="Enter your comment..."
       ></textarea>
+      <div className="h-[30px]">{errorComment && <p className='text-sm text-red-500'>{errorComment}</p>}</div>
       <button
         onClick={onComment}
         className="py-1 px-3 cursor-pointer bg-green-700 text-sm font-medium text-white rounded hover:bg-green-600"
@@ -33,11 +44,10 @@ function Comment({ onComment, comments, setComment, comment }) {
 }
 
 const CommentChild = ({ avatar, userName, rating, content, time }) => {
-
-    const setUpReating = () => {
-    const arr = []
-    for(let i = 0; i < rating; i++) {
-        arr.push(i)
+  const setUpReating = () => {
+    const arr = [];
+    for (let i = 0; i < rating; i++) {
+      arr.push(i);
     }
     return arr;
   };
@@ -74,8 +84,9 @@ const CommentChild = ({ avatar, userName, rating, content, time }) => {
         <div className="ml-8">
           <p>{userName}</p>
           <div className="flex justify-start">
-            {rate.map((item) => <StarIcon key={item} size="0.7rem" color="orange" />)}
-            
+            {rate.map((item) => (
+              <StarIcon key={item} size="0.7rem" color="orange" />
+            ))}
           </div>
           <p className="text-gray-700 text-xs mt-1">{timeReview}</p>
         </div>
