@@ -1,0 +1,18 @@
+
+.swiper {
+    width: 100%;
+    height: 100%;
+  }
+
+.swiper-slide-detail-cart {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .swiper-slide-detail-cart img {
+    display: block;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+  }

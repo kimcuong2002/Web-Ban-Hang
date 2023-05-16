@@ -11,30 +11,8 @@
 @import "./pages/form";
 @import "./pages/button";
 @import "./pages/alert";
+@import "./pages/detailCart";
 
 @import "./pages/authForm";
 @import "./pages/createProduct";
-
-* {
-  margin: 0;
-  padding: 0;
-}
-
-.swiper {
-  width: 100%;
-  height: 100%;
-}
-
-.swiper-slide {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.swiper-slide img {
-  display: block;
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-}
 

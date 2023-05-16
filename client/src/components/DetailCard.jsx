@@ -208,7 +208,7 @@ const DetailsCard = ({ product }) => {
                 className="mySwiper"
               >
                 {product.images.map((image, index) => (
-                  <SwiperSlide key={index} onClick={() => setImage(image)}>
+                  <SwiperSlide className='swiper-slide-detail-cart' key={index} onClick={() => setImage(image)}>
                     <img
                       src={`../${
                         import.meta.env.VITE_PATH_IMAGE
