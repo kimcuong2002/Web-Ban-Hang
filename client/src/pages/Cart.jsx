@@ -15,37 +15,36 @@ import {
   decQuantity,
   removeItem,
 } from '../redux/reducers/cartReducer';
-import { useSendPaymentMutation } from '../redux/services/paymentService';
 import { useCreateOrderMutation } from '../redux/services/userOrdersService';
 import Modal from '../components/Modal';
 import { setInfoUser } from '../redux/reducers/orderReducer';
 import {
-  useCreateCartMutation,
   useUpdateCartMutation,
   useDeleteCartMutation,
   useGetCartByIdUserQuery,
+  useCreateCartMutation
 } from '../redux/services/cartService';
 
 const Cart = () => {
   const [openModal, setOpenModal] = useState(false);
   const { cart, total } = useSelector((state) => state.cartReducer);
   const { infoUser } = useSelector((state) => state.orderReducer);
-  const { userToken, user } = useSelector((state) => state.authReducer);
+  const { user, userToken } = useSelector((state) => state.authReducer);
   const dispatch = useDispatch();
   const toast = useToastify();
+  const [createCart, response] = useCreateCartMutation();
   const [updateCart] = useUpdateCartMutation();
-  const [deleteCart] = useDeleteCartMutation();
-  const [createCart, res] = useCreateCartMutation();
+  const [deleteCart, resDelete] = useDeleteCartMutation();
   const [createOrder, resp] = useCreateOrderMutation();
-  const { refetch, data } = useGetCartByIdUserQuery(user?.id);
-  const navigate = useNavigate();
-  const [doPayment, response] = useSendPaymentMutation();
+  const { data, refetch } = useGetCartByIdUserQuery(user?.id);
   const inc = (i) => {
     dispatch(incQuantity(i));
   };
+
   const dec = (i) => {
     dispatch(decQuantity(i));
   };
+
   const remove = (id) => {
     Swal.fire({
       title: 'Are you sure?',
@@ -62,59 +61,11 @@ const Cart = () => {
       }
     });
   };
-  const pay = () => {
-    if (userToken) {
-      //doPayment({ cart, id: user.id });
-      toast.handleOpenToastify('success', 'Purchase successfully!', 1000);
-      dispatch(setCart([]));
-      localStorage.removeItem('cart');
-      dispatch(setInfoUser({ name: '', address: '', phone: '' }));
-      localStorage.removeItem('cartId');
-      setOpenModal(false);
-    } else {
-      navigate('/login');
-    }
-  };
+
   useEffect(() => {
-    const cartLocal = JSON.parse(localStorage.getItem('cart'));
     let arr = data?.cart[0]?.cart ? data?.cart[0]?.cart : [];
     let total = 0;
-    if (user && data) {
-      if (arr.length !== 0 && !cartLocal) {
-        dispatch(setCart([]));
-        dispatch(setTotal(0));
-      }
-      if (cartLocal) {
-        for (const cart of cartLocal) {
-          const index = arr.findIndex(
-            (item) =>
-              item.name === cart.name &&
-              item.color === cart.color &&
-              item.size === cart.size
-          );
-          if (index === -1) {
-            arr = [...arr, cart];
-          }
-        }
-      } 
-      for (let a of arr) {
-        total += discount(a.price * a.quantity, a.discount);
-      }
-      dispatch(setCart(arr));
-      dispatch(setTotal(total));
-    } else if(!user && !data && cartLocal) {
-      let arr = [];
-      for (const cart of cartLocal) {
-        const index = arr.findIndex(
-          (item) =>
-            item.name === cart.name &&
-            item.color === cart.color &&
-            item.size === cart.size
-        );
-        if (index === -1) {
-          arr = [...arr, cart];
-        }
-      } 
+    if(userToken && data?.cart.length > 0) {
       for (let a of arr) {
         total += discount(a.price * a.quantity, a.discount);
       }
@@ -122,6 +73,12 @@ const Cart = () => {
       dispatch(setTotal(total));
     }
   }, []);
+
+  useEffect(() => {
+    if(response?.isSuccess) {
+      localStorage.setItem('cartId', response.data?.cart.id);
+    }
+  }, [response?.isSuccess])
 
   useEffect(() => {
     const id = localStorage.getItem('cartId');
@@ -138,51 +95,35 @@ const Cart = () => {
         localStorage.removeItem('cartId');
       }
     } else {
-      if (cart.length !== 0) {
+      if(cart.length !== 0) {
         createCart({
           userId: user?.id,
           cart: cart,
-        });
+        })
       }
     }
   }, [cart]);
-
-  useEffect(() => {
-    if (res?.isSuccess) {
-      localStorage.setItem('cartId', res?.data?.cart?.id);
-    }
-  }, [res?.isSuccess]);
-
-  useEffect(() => {
-    if (response?.isSuccess) {
-      window.location.href = response?.data?.url;
-      dispatch(setCart([]));
-      dispatch(setInfoUser({ name: '', address: '', phone: '' }));
-      localStorage.removeItem('cartId');
-      setOpenModal(false);
-      toast.handleOpenToastify('success', 'Purchase successfully!', 1000);
-    }
-  }, [response]);
 
   useEffect( () => {
     if (resp?.isSuccess) {
       const id = localStorage.getItem('cartId');
       if (id) {
-        updateCart({
-          id: id,
-          body: {
-            cart: [],
-          },
-        });
+        deleteCart(id)
       }
       toast.handleOpenToastify('success', 'Purchase successfully!', 1000);
+      localStorage.removeItem('cartId');
       dispatch(setCart([]));
       localStorage.removeItem('cart');
       dispatch(setInfoUser({ name: '', address: '', phone: '' }));
-      localStorage.removeItem('cartId');
       setOpenModal(false);
     }
   }, [resp?.isSuccess]);
+
+  useEffect(() => {
+    if(resDelete?.isSuccess) {
+      refetch()
+    }
+  }, [resDelete?.isSuccess])
 
   return (
     <div className="relative z-50">
@@ -442,7 +383,7 @@ const Cart = () => {
                     setOpenModal(true);
                   }}
                 >
-                  {response.isLoading ? 'Loading...' : 'Order'}
+                 Order
                 </button>
               </div>
             </div>

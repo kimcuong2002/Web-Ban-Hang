@@ -168,13 +168,6 @@ const DetailsCard = ({ product }) => {
   }, [responseReview?.isSuccess]);
 
   useEffect(() => {
-    if (cart.length !== 0) {
-      setIdCart('');
-      dispatch(setTotal(0));
-    }
-  }, [cart]);
-
-  useEffect(() => {
     if (res?.isSuccess) {
       setIdCart(res?.data?.cart.id);
       localStorage.setItem('cartId', res?.data?.cart.id);

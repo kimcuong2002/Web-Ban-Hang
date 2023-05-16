@@ -20,6 +20,7 @@ import {
   FaLinkedinIn,
 } from "react-icons/fa";
 import useToastify from "../hooks/useToatify";
+import { setCart, setTotal } from "../redux/reducers/cartReducer";
 
 const LoginForm = () => {
   const [errors, setErrors] = useState([]);
@@ -51,6 +52,11 @@ const LoginForm = () => {
         navigate("/admin/products");
       } else {
         localStorage.setItem("userToken", response?.data?.token);
+        if(localStorage.getItem("cart")) {
+          localStorage.removeItem('cart');
+        }
+        dispatch(setCart([]))
+        dispatch(setTotal(0))
         dispatch(setUserToken(response?.data?.token));
         navigate("/");
       }
