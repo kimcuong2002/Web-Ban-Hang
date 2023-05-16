@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import StarIcon from './StarIcon';
+import Spinner from './Spinner';
 
 function Comment({
   onComment,
@@ -16,29 +17,37 @@ function Comment({
       <textarea
         value={comment.content}
         onChange={(e) => {
-          setComment({ ...comment, content: e.target.value })
-          setErrorComment('')
+          setComment({ ...comment, content: e.target.value });
+          setErrorComment('');
         }}
         className=" placeholder:text-sm my-2 resize-y rounded-md w-full p-3 drop-shadow-lg border border-x-gray-500"
         placeholder="Enter your comment..."
       ></textarea>
-      <div className="h-[30px]">{errorComment && <p className='text-sm text-red-500'>{errorComment}</p>}</div>
+      <div className="h-[30px]">
+        {errorComment && <p className="text-sm text-red-500">{errorComment}</p>}
+      </div>
       <button
         onClick={onComment}
         className="py-1 px-3 cursor-pointer bg-green-700 text-sm font-medium text-white rounded hover:bg-green-600"
       >
         Comment
       </button>
-      {comments?.map((comment) => (
-        <CommentChild
-          key={comment?.id}
-          avatar={comment?.user.avatar}
-          userName={comment?.user.username}
-          rating={comment?.rating}
-          content={comment?.comment}
-          time={comment?.createdAt}
-        />
-      ))}
+      {comments ? (
+        comments?.map((comment) => (
+          <CommentChild
+            key={comment?.id}
+            avatar={comment?.user.avatar}
+            userName={comment?.user.username}
+            rating={comment?.rating}
+            content={comment?.comment}
+            time={comment?.createdAt}
+          />
+        ))
+      ) : (
+        <div className='mt-10'>
+          <Spinner />
+        </div>
+      )}
     </div>
   );
 }

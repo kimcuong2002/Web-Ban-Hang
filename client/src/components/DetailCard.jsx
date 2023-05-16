@@ -321,8 +321,6 @@ const DetailsCard = ({ product }) => {
             Rating: {sumStar}/5
           </p>
         </div>
-        {!reviews?.isFetching ? (
-          <>
             <Comment
               setComment={setComment}
               comment={comment}
@@ -338,10 +336,6 @@ const DetailsCard = ({ product }) => {
               count={reviews.data?.count}
               click={(p) => setPage(p)}
             />
-          </>
-        ) : (
-          <Spinner />
-        )}
       </div>
     </motion.div>
   );
