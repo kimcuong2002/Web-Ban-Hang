@@ -7,7 +7,7 @@ import { logout } from "../redux/reducers/authReducer";
 const AccountList = () => {
   const dispatch = useDispatch();
   return (
-    <div className="flex flex-col gap-5 text-lg w-[20%] pl-5">
+    <div className="flex flex-col gap-5 text-lg lg:w-[20%] md:w-[30%] sm:w-[40%] pl-5 border-gray-500 border-r-2">
       <NavLink to="/profile" className="flex gap-3 items-center">
         <BsPersonCircle size={22} />
         <span className="account-list-title">My account</span>

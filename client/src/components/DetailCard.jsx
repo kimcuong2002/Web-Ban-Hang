@@ -16,10 +16,14 @@ import {
   useCreateCartMutation,
   useUpdateCartMutation,
 } from '../redux/services/cartService';
-import {useGetReviewsQuery, useCreateReviewMutation, usePrefetch} from '../redux/services/reviewServices';
+import {
+  useGetReviewsQuery,
+  useCreateReviewMutation,
+} from '../redux/services/reviewServices';
 import Comment from './Comment';
 import StarIcon from './StarIcon';
 import { useNavigate } from 'react-router-dom';
+import Spinner from './Spinner';
 
 const DetailsCard = ({ product }) => {
   const [sizeState, setSizeState] = useState(
@@ -38,17 +42,18 @@ const DetailsCard = ({ product }) => {
   const [comment, setComment] = useState({
     rating: 0,
     content: '',
-  })
+  });
 
-  
   const limit = useMemo(() => {
     return 5;
-  }, [])
-  
+  }, []);
+  const reviews = useGetReviewsQuery({
+    page: page,
+    productId: product.id,
+    limit: limit,
+  });
   const [createReview, responseReview] = useCreateReviewMutation();
-  const reviews = useGetReviewsQuery({page: page, productId: product.id, limit: limit})
-  const prefetchReviews = usePrefetch(`/reviews?page=${page}&&limit=${limit}&&productId=${product?.id}`);
-  
+
   const inc = () => {
     setQuantity(quantity + 1);
   };
@@ -127,7 +132,7 @@ const DetailsCard = ({ product }) => {
 
   const handleComment = () => {
     if (userToken) {
-      if(comment.rating === 0 && !comment.content) {
+      if (comment.rating === 0 && !comment.content) {
         return;
       }
       createReview({
@@ -135,31 +140,30 @@ const DetailsCard = ({ product }) => {
         message: comment.content,
         product: product?.id,
         user: user?.id,
-      })
+      });
     } else {
       navigate('/login');
     }
   };
 
   const handleChooseSumStar = (item) => {
-    if(item === sumStar) {
-      setComment({...comment, rating: 0})
-      return setSumStar(0)
+    if (item === sumStar) {
+      setComment({ ...comment, rating: 0 });
+      return setSumStar(0);
     }
-    setComment({...comment, rating: item})
-    setSumStar(item) 
-  }
+    setComment({ ...comment, rating: item });
+    setSumStar(item);
+  };
 
   useEffect(() => {
-    if(responseReview?.isSuccess) {
-      prefetchReviews();
-      handleChooseSumStar(0)
-      setComment({rating: 0, content: ''})
+    if (responseReview?.isSuccess) {
+      reviews.refetch();
+      handleChooseSumStar(0);
+      setComment({ rating: 0, content: '' });
+      setPage(1);
       toast.success('You review product successfully!');
     }
-  }, [responseReview?.isSuccess])
-
-
+  }, [responseReview?.isSuccess]);
 
   useEffect(() => {
     if (cart.length !== 0) {
@@ -186,12 +190,14 @@ const DetailsCard = ({ product }) => {
         {product.images.length > 0 && (
           <>
             <div className="flex flex-wrap -mx-1">
-              <div className='sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[400px] lg:h-[400px] object-cover mx-auto'>
-              <img
-                src={`../${import.meta.env.VITE_PATH_IMAGE}/products/${image}`}
-                alt="image"
-                className="w-full h-auto object-cover"
-              />
+              <div className="sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[400px] lg:h-[400px] object-cover mx-auto">
+                <img
+                  src={`../${
+                    import.meta.env.VITE_PATH_IMAGE
+                  }/products/${image}`}
+                  alt="image"
+                  className="w-full h-auto object-cover"
+                />
               </div>
 
               <Swiper
@@ -308,19 +314,42 @@ const DetailsCard = ({ product }) => {
         <div className="mt-4 leading-[27px] description">{desc}</div>
       </div>
       <div className="w-full order-3 px-5 items-center">
-        <div className=''>
+        <div className="">
           <p>Rating</p>
-          <div className=" flex justify-start" >
-            {[1,2,3,4,5].map((item) => (
-              <StarIcon key={item} click={() => handleChooseSumStar(item)} size="1.5rem" color={item <= sumStar ? 'orange' : 'gray'}/>
-            )) }
+          <div className=" flex justify-start">
+            {[1, 2, 3, 4, 5].map((item) => (
+              <StarIcon
+                key={item}
+                click={() => handleChooseSumStar(item)}
+                size="1.5rem"
+                color={item <= sumStar ? 'orange' : 'gray'}
+              />
+            ))}
           </div>
-          <p className='italic font-sans flex justify-start'>Rating: {sumStar}/5</p>
+          <p className="italic font-sans flex justify-start">
+            Rating: {sumStar}/5
+          </p>
         </div>
-        <Comment setComment={setComment} comment={comment} onComment={handleComment} comments={reviews.data?.reviews} colorIcon={'orange'}/>
-        <Pagination page={parseInt(page)} perPage={limit} count={reviews.data?.count} click={(p) => setPage(p)} />
+        {!reviews?.isFetching ? (
+          <>
+            <Comment
+              setComment={setComment}
+              comment={comment}
+              onComment={handleComment}
+              comments={reviews.data?.reviews}
+              colorIcon={'orange'}
+            />
+            <Pagination
+              page={parseInt(page)}
+              perPage={limit}
+              count={reviews.data?.count}
+              click={(p) => setPage(p)}
+            />
+          </>
+        ) : (
+          <Spinner />
+        )}
       </div>
-      
     </motion.div>
   );
 };

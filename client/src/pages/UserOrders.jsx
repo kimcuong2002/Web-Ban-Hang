@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Spinner from '../components/Spinner';
 import Pagination from '../components/Pagination';
 import Modal from '../components/Modal';
+import Swal from 'sweetalert2';
 import { useState } from 'react';
 import { AiOutlineCloseCircle } from 'react-icons/ai';
 import {
@@ -18,7 +19,7 @@ import { useParams } from 'react-router-dom';
 import AccountList from '../components/AccountList';
 
 const UserOrders = () => {
-  let {page} = useParams();
+  let { page } = useParams();
   if (!page) {
     page = 1;
   }
@@ -27,29 +28,59 @@ const UserOrders = () => {
   const [orderBody, setOrderBody] = useState({});
   const dispatch = useDispatch();
   const orders = useGetOrdersQuery(page);
-  const [deleteOrders, response] = useDeleteOrderMutation();
-  const [updateOrder] = useUpdateOrderMutation();
+  const [deleteOrders, resDelete] = useDeleteOrderMutation();
+  const [updateOrder, resUpdate] = useUpdateOrderMutation();
   const toast = useToastify();
 
-  console.log(orders)
-
   const deleteOrder = (id) => {
-    if (window.confirm('Do you want to delete the order?')) {
-      deleteOrders(id);
-    }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to delete this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire('Deleted!', 'Your file has been deleted.', 'success');
+        deleteOrders(id);
+      }
+    });
   };
 
+  useEffect(() => {
+    if (resUpdate?.error || resDelete?.error) {
+      toast.handleOpenToastify(
+        'error',
+        resUpdate?.isSuccess ? 'Update failed!' : 'Delete failed!',
+        1000
+      );
+    }
+  }, [resUpdate?.error, resDelete?.error]);
+
+  useEffect(() => {
+    if (resUpdate?.isSuccess || resDelete?.isSuccess) {
+      orders.refetch();
+      toast.handleOpenToastify(
+        'success',
+        resUpdate?.isSuccess ? 'Update successfully!' : 'Delete successfully!',
+        1000
+      );
+    }
+  }, [resUpdate?.isSuccess, resDelete?.isSuccess]);
+
   return (
-    <div className="flex mb-10 mt-10 md:gap-3 lg:gap-7">
+    <div className="flex mx-auto w-[90%] mb-10 mt-10">
       <AccountList />
-      <div className='w-[80%]'>
-        <div className="w-full ">
-          {openModal && (
+      <div className="w-[80%]">
+        {openModal && (
+          <div className="w-full ">
             <Modal
               setOpen={setOpenModal}
               className="2xl:overflow-x-auto w-[1500px]"
             >
-              <div className="modal_container bg-white w-[70%] p-[20px] z-[60]">
+              <div className="modal_container bg-white w-[90%] h-[90%] p-[20px] z-[60]">
                 <div className="flex justify-between text-[30px] uppercase">
                   <p>Cart</p>
                   <AiOutlineCloseCircle
@@ -118,19 +149,19 @@ const UserOrders = () => {
                 <p className="font-[17px] mt-[20px] font-bold">
                   Product Informations
                 </p>
-                <hr className="my-[30px] h-[1.5px]" />
+                <hr className="my-[10px] h-[1.5px]" />
                 <div>
-                  <ul className="w-full flex uppercase justify-between text-center font-bold mb-[20px]">
-                    <li className="w-[20%]">image</li>
-                    <li className="w-[30%]">name</li>
-                    <li className="w-[10%]">color</li>
-                    <li className="w-[10%]">size</li>
-                    <li className="w-[10%]">quantities</li>
-                    <li className="w-[10%]">price</li>
-                    <li className="w-[10%]">total</li>
+                  <ul className="w-full flex uppercase justify-between text-center font-bold mb-[10px]">
+                    <li className="w-[20%] text-sm">image</li>
+                    <li className="w-[30%] text-sm">name</li>
+                    <li className="w-[10%] text-sm">color</li>
+                    <li className="w-[10%] text-sm">size</li>
+                    <li className="w-[10%] text-sm">quantities</li>
+                    <li className="w-[10%] text-sm">price</li>
+                    <li className="w-[10%] text-sm">total</li>
                   </ul>
-                  <hr className="mb-[20px]" />
-                  <div className="overflow-y-auto h-[300px]">
+                  <hr className="mb-[10px]" />
+                  <div className="overflow-y-scroll h-[150px]">
                     {orderBody.cart &&
                       orderBody.cart.map((item, index) => {
                         return (
@@ -144,10 +175,12 @@ const UserOrders = () => {
                                   import.meta.env.VITE_PATH_IMAGE
                                 }/products/${item.images[0]}`}
                                 alt=""
-                                className="w-[150px]"
+                                className="w-[50px]"
                               />
                             </div>
-                            <p className="w-[30%] text-center">{item.name}</p>
+                            <p className="w-[30%] text-center text-sm">
+                              {item.name}
+                            </p>
                             <div className="w-[10%] h-[20px]">
                               {' '}
                               <span
@@ -158,9 +191,9 @@ const UserOrders = () => {
                                 }}
                               ></span>
                             </div>
-                            <p className="w-[10%]">{item.size}</p>
-                            <p className="w-[10%]">{item.quantity}</p>
-                            <p className="w-[10%]">
+                            <p className="w-[10%] text-sm">{item.size}</p>
+                            <p className="w-[10%] text-sm">{item.quantity}</p>
+                            <p className="w-[10%] text-sm">
                               {currency.format(
                                 discount(item.price, item.discount),
                                 {
@@ -168,7 +201,7 @@ const UserOrders = () => {
                                 }
                               )}
                             </p>
-                            <p className="w-[10%] ">
+                            <p className="w-[10%] text-sm">
                               {item.quantity *
                                 discount(item.price, item.discount)}
                             </p>
@@ -180,7 +213,6 @@ const UserOrders = () => {
                 <div className="w-[100%] flex justify-end gap-x-[20px]">
                   <button
                     onClick={() => {
-                      console.log('aaaaaaaaaaaa', infoUser);
                       if (orders.isSuccess === true) {
                         toast.handleOpenToastify(
                           'success',
@@ -219,12 +251,12 @@ const UserOrders = () => {
                 </div>
               </div>
             </Modal>
-          )}
-        </div>
+          </div>
+        )}
         {orders.isSuccess ? (
           <>
-            <div className='w-full overflow-x-scroll'>
-              <table className=" bg-gray-900 rounded-md ">
+            <div className="w-[80%] overflow-x-scroll mx-auto">
+              <table className=" bg-gray-900 rounded-md mx-auto">
                 <thead>
                   <tr className="border-b border-gray-800 text-left">
                     <th className="p-3 uppercase text-sm font-medium text-gray-500 text-center">
@@ -300,7 +332,7 @@ const UserOrders = () => {
               perPage={orders.data?.perPage}
               count={orders.data?.count}
               theme={'dark'}
-              path="/orders"
+              path="orders"
             />
           </>
         ) : (

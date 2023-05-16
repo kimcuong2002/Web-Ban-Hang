@@ -28,12 +28,10 @@ const Profile = () => {
     <>
       <Toaster position="top-right" reverseOrder={false} />
       {/* <Header>my account</Header> */}
-      <div className="container w-4/5 pb-10" style={{ margin: "0 auto" }}>
-        <div className="flex flex-wrap -mx-6">
-          <div className="w-full md:w-3/12 p-6">
-            <AccountList />
-          </div>
-          <div className="w-full md:w-9/12 p-6">
+      <div className="container w-[90%] pb-10 mt-10 mx-auto">
+        <div className="flex mx-6">
+        <AccountList />
+          <div className="w-[80%] p-6">
             <h1 className="text-lg">
               Name: <span className="font-bold">{user?.fullname}</span>
             </h1>

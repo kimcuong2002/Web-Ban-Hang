@@ -44,7 +44,7 @@ const createRating = async (req, res) => {
           select: ['username', 'avatar'],
           model: 'User'
         }
-      ]).skip(skip).limit(limit).exec((err, story) => {
+      ]).skip(skip).limit(limit).sort({createdAt: -1}).exec((err, story) => {
         if(err) {
           return res.json(err)
         }

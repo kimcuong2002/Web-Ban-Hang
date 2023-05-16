@@ -426,7 +426,7 @@ const Cart = () => {
           </>
         ) : (
           <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-md text-sm font-medium text-red-700">
-            Cart is empty!a
+            Cart is empty!
           </div>
         )}
       </motion.div>

@@ -23,6 +23,8 @@ const AdminProducts = () => {
   if (!page) {
     page = 1;
   }
+  const products = useGetProductsQuery(page);
+
   const [updateProduct, myResponse] = useUpdateProductMutation();
   const {
     register,
@@ -47,11 +49,10 @@ const AdminProducts = () => {
     }
   }, [myResponse?.error?.data?.errors]);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   useEffect(() => {
     if (myResponse?.isSuccess) {
+      setOpenModal(false);
       dispatch(setSuccess(myResponse?.data?.msg));
-      navigate("/admin/products");
     }
   }, [myResponse?.isSuccess]);
 
@@ -104,9 +105,6 @@ const AdminProducts = () => {
     setErrorVali({...errorVali, size: ""})
   };
 
-
-  const products = useGetProductsQuery(page);
-  // console.log(data);
   const { success } = useSelector((state) => state.globalReducer);
   const [delProduct, response] = useDeleteProductMutation();
   const [openModal, setOpenModal] = useState(false);
@@ -195,12 +193,6 @@ const AdminProducts = () => {
       body: formData
     })
   }
-
-  useEffect(() => {
-    if(myResponse?.isSuccess) {
-      setOpenModal(false)
-    }
-  }, [myResponse?.isSuccess])
 
   return (
     <div className="relative" >

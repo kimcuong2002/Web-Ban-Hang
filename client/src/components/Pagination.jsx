@@ -17,7 +17,7 @@ const Pagination = ({ page, count, perPage, path, theme, click }) => {
     const allLinks = [];
     for (let i = startLoop; i <= endLoop; i++) {
       allLinks.push(
-        <li key={i} className={`pagination-li mr-1 px-2 py-1 rounded ${
+        <li key={i} className={`pagination-li mr-1 px-2 py-1 rounded cursor-pointer ${
           theme === "light" ? "pagination-link-light" : "pagination-link"
         }  ${page === i && "bg-indigo-500 text-white"}`} onClick={() => {
           if(!path) {
@@ -32,7 +32,7 @@ const Pagination = ({ page, count, perPage, path, theme, click }) => {
           >
             {i}
           </Link>}
-          {i}
+          {!path && click && i}
         </li>,
       );
     }

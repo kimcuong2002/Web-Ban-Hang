@@ -54,8 +54,6 @@ const AdminOrder = () => {
     });
   };
 
-  console.log(orderBody)
-
   useEffect(() => {
     if (!res.isSuccess) {
       res?.error?.data?.errors.map((err) => {
@@ -66,7 +64,7 @@ const AdminOrder = () => {
 
   useEffect(() => {
     if (res?.isSuccess) {
-      navigate('/admin/orders');
+      orders.refetch();
       toast.handleOpenToastify('success', 'Update successfully', 1000);
       setOpenModal(false);
     }
@@ -74,8 +72,8 @@ const AdminOrder = () => {
 
   return (
     <div>
-      <div className="2xl:w-[1400px] overflow-x-scroll">
-        {openModal && (
+      {openModal && (
+        <div className="2xl:w-[1400px] overflow-x-scroll">
           <Modal
             setOpen={setOpenModal}
             className="2xl:overflow-x-auto w-[1500px]"
@@ -154,14 +152,18 @@ const AdminOrder = () => {
                   onChange={(e) => setStatus(e.target.value)}
                   className="w-[75%] border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5"
                 >
-                  <option selected={status === 'WAITTING'} value="WAITTING">WAITTING</option>
-                  <option selected={status === 'DELIVERED'} value="DELIVERED">DELIVERED</option>
-                  <option selected={status === 'FINISH'} value="FINISH">FINISH</option>
+                  <option selected={status === 'WAITTING'} value="WAITTING">
+                    WAITTING
+                  </option>
+                  <option selected={status === 'DELIVERED'} value="DELIVERED">
+                    DELIVERED
+                  </option>
+                  <option selected={status === 'FINISH'} value="FINISH">
+                    FINISH
+                  </option>
                 </select>
               </div>
-              <p className="font-[17px] mt-[20px] font-bold">
-                Product Informations
-              </p>
+              <p className="mt-[20px] font-bold">Product Informations</p>
               <hr className="my-[30px] h-[1.5px]" />
               <div>
                 <ul className="w-full flex uppercase justify-between text-center font-bold mb-[20px]">
@@ -230,22 +232,23 @@ const AdminOrder = () => {
                         fullname: infoUser.name,
                         address: infoUser.address,
                         phone: infoUser.phone,
-                        status: status
+                        status: status,
                       },
                     });
                   }}
-                  className="border-2 py-[5px] px-[10px] rounded-[7px] border-cyan-500 text-cyan-500 hover:bg-cyan-500 border-white hover:text-black mr-[40px]"
+                  className="border-2 py-[5px] px-[10px] rounded-[7px] text-cyan-500 hover:bg-cyan-500 border-white hover:text-black mr-[40px]"
                 >
                   Update
                 </button>
               </div>
             </div>
           </Modal>
-        )}
-      </div>
+        </div>
+      )}
+
       <Wrapper>
         {success && <div className="alert-success">{success}</div>}
-        {orders.isSuccess ? (
+        {!orders?.isFetching ? (
           <>
             <div>
               <table className="w-full bg-gray-900 rounded-md">
@@ -298,7 +301,7 @@ const AdminOrder = () => {
                             className="btn btn-warning"
                             onClick={() => {
                               setOrderBody({ ...item });
-                              setStatus(item.status)
+                              setStatus(item.status);
                               dispatch(
                                 setInfoUser({
                                   ...infoUser,
